@@ -1,0 +1,29 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace bbaToolS5
+{
+    internal class BbaFileFromFilesystem : BbaFile
+    {
+        internal string SourceFilePath;
+
+        public override Stream GetStream()
+        {
+            return new FileStream(SourceFilePath, FileMode.Open);
+        }
+
+        public override byte[] GetBytes()
+        {
+            return File.ReadAllBytes(SourceFilePath);
+        }
+
+        public override string ToString()
+        {
+            return $"{InternalPath} <- {SourceFilePath}";
+        }
+    }
+}
