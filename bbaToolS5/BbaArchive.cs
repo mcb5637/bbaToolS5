@@ -42,7 +42,7 @@ namespace bbaToolS5
         {
             AddFile(new BbaFileFromMem()
             {
-                InternalPath = internalPath.ToLower(),
+                InternalPath = FixPath(internalPath),
                 Data = data
             });
         }
@@ -55,6 +55,23 @@ namespace bbaToolS5
                 Contents[i].Remove();
                 Contents.RemoveAt(i);
             }
+        }
+
+        public bool RenameFile(string currName, string newName)
+        {
+            RemoveFile(newName);
+            int i = Contents.FindIndex((x) => x.InternalPath.Equals(currName));
+            if (i >= 0)
+            {
+                Contents[i].InternalPath = FixPath(newName);
+                return true;
+            }
+            return false;
+        }
+
+        private string FixPath(string path)
+        {
+            return path.ToLower().Replace("/", "\\");
         }
 
         public BbaFile GetFileByName(string name)

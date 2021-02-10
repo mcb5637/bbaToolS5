@@ -23,7 +23,7 @@ namespace bbaToolS5
 
         public override string ToString()
         {
-            return $"{InternalPath} <- Memory block";
+            return $"{InternalPath} <- Memory block, {Data.Length} bytes";
         }
     }
 }
