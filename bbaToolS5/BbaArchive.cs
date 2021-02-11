@@ -57,6 +57,13 @@ namespace bbaToolS5
             }
         }
 
+        public void CopyFile(BbaFile f, string intName)
+        {
+            BbaFile copy = f.Clone();
+            copy.InternalPath = intName.ToLower();
+            AddFile(copy);
+        }
+
         public bool RenameFile(string currName, string newName)
         {
             RemoveFile(newName);

@@ -47,6 +47,8 @@ namespace S5xTool
             this.CBRandomGUID = new System.Windows.Forms.CheckBox();
             this.ComboBox_MPType = new System.Windows.Forms.ComboBox();
             this.ComboBox_Key = new System.Windows.Forms.ComboBox();
+            this.BtnPeek = new System.Windows.Forms.Button();
+            this.BtnReplaceImage = new System.Windows.Forms.Button();
             LBLMPMode = new System.Windows.Forms.Label();
             LBLKey = new System.Windows.Forms.Label();
             this.SuspendLayout();
@@ -54,17 +56,30 @@ namespace S5xTool
             // LBLMPMode
             // 
             LBLMPMode.AutoSize = true;
-            LBLMPMode.Location = new System.Drawing.Point(144, 230);
+            LBLMPMode.Location = new System.Drawing.Point(142, 160);
             LBLMPMode.Name = "LBLMPMode";
             LBLMPMode.Size = new System.Drawing.Size(56, 13);
             LBLMPMode.TabIndex = 13;
             LBLMPMode.Text = "MP Mode:";
             // 
+            // LBLKey
+            // 
+            LBLKey.AutoSize = true;
+            LBLKey.Location = new System.Drawing.Point(142, 189);
+            LBLKey.Name = "LBLKey";
+            LBLKey.Size = new System.Drawing.Size(43, 13);
+            LBLKey.TabIndex = 15;
+            LBLKey.Text = "AddOn:";
+            // 
             // ListBox_Data
             // 
             this.ListBox_Data.AllowDrop = true;
+            this.ListBox_Data.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.ListBox_Data.FormattingEnabled = true;
             this.ListBox_Data.Location = new System.Drawing.Point(498, 12);
+            this.ListBox_Data.MinimumSize = new System.Drawing.Size(714, 563);
             this.ListBox_Data.Name = "ListBox_Data";
             this.ListBox_Data.Size = new System.Drawing.Size(714, 563);
             this.ListBox_Data.TabIndex = 0;
@@ -76,7 +91,7 @@ namespace S5xTool
             // 
             this.BtnLoad.Location = new System.Drawing.Point(12, 12);
             this.BtnLoad.Name = "BtnLoad";
-            this.BtnLoad.Size = new System.Drawing.Size(127, 23);
+            this.BtnLoad.Size = new System.Drawing.Size(126, 23);
             this.BtnLoad.TabIndex = 1;
             this.BtnLoad.Text = "Load s5x/bba";
             this.BtnLoad.UseVisualStyleBackColor = true;
@@ -84,7 +99,7 @@ namespace S5xTool
             // 
             // BtnSave
             // 
-            this.BtnSave.Location = new System.Drawing.Point(145, 12);
+            this.BtnSave.Location = new System.Drawing.Point(144, 12);
             this.BtnSave.Name = "BtnSave";
             this.BtnSave.Size = new System.Drawing.Size(134, 23);
             this.BtnSave.TabIndex = 2;
@@ -94,7 +109,7 @@ namespace S5xTool
             // 
             // Dlg_Open
             // 
-            this.Dlg_Open.Filter = "Maps|*.s5x|Archives|*.bba|All|*.*";
+            this.Dlg_Open.Filter = "Maps|*.s5x|Archives|*.bba|All|*.*|Map Images|*.png";
             // 
             // CB_LoadMerge
             // 
@@ -108,9 +123,9 @@ namespace S5xTool
             // 
             // BtnRemove
             // 
-            this.BtnRemove.Location = new System.Drawing.Point(12, 552);
+            this.BtnRemove.Location = new System.Drawing.Point(12, 285);
             this.BtnRemove.Name = "BtnRemove";
-            this.BtnRemove.Size = new System.Drawing.Size(127, 23);
+            this.BtnRemove.Size = new System.Drawing.Size(126, 23);
             this.BtnRemove.TabIndex = 4;
             this.BtnRemove.Text = "Remove";
             this.BtnRemove.UseVisualStyleBackColor = true;
@@ -118,14 +133,14 @@ namespace S5xTool
             // 
             // TB_Rename
             // 
-            this.TB_Rename.Location = new System.Drawing.Point(144, 525);
+            this.TB_Rename.Location = new System.Drawing.Point(144, 258);
             this.TB_Rename.Name = "TB_Rename";
-            this.TB_Rename.Size = new System.Drawing.Size(347, 20);
+            this.TB_Rename.Size = new System.Drawing.Size(348, 20);
             this.TB_Rename.TabIndex = 5;
             // 
             // BtnRenameTo
             // 
-            this.BtnRenameTo.Location = new System.Drawing.Point(12, 523);
+            this.BtnRenameTo.Location = new System.Drawing.Point(12, 256);
             this.BtnRenameTo.Name = "BtnRenameTo";
             this.BtnRenameTo.Size = new System.Drawing.Size(126, 23);
             this.BtnRenameTo.TabIndex = 6;
@@ -147,7 +162,7 @@ namespace S5xTool
             // 
             this.BtnAddFile.Location = new System.Drawing.Point(12, 87);
             this.BtnAddFile.Name = "BtnAddFile";
-            this.BtnAddFile.Size = new System.Drawing.Size(127, 23);
+            this.BtnAddFile.Size = new System.Drawing.Size(126, 23);
             this.BtnAddFile.TabIndex = 8;
             this.BtnAddFile.Text = "Add File";
             this.BtnAddFile.UseVisualStyleBackColor = true;
@@ -155,7 +170,7 @@ namespace S5xTool
             // 
             // BtnExportFile
             // 
-            this.BtnExportFile.Location = new System.Drawing.Point(145, 87);
+            this.BtnExportFile.Location = new System.Drawing.Point(144, 87);
             this.BtnExportFile.Name = "BtnExportFile";
             this.BtnExportFile.Size = new System.Drawing.Size(134, 23);
             this.BtnExportFile.TabIndex = 9;
@@ -169,7 +184,7 @@ namespace S5xTool
             // 
             // BtnRandomGUID
             // 
-            this.BtnRandomGUID.Location = new System.Drawing.Point(12, 227);
+            this.BtnRandomGUID.Location = new System.Drawing.Point(12, 155);
             this.BtnRandomGUID.Name = "BtnRandomGUID";
             this.BtnRandomGUID.Size = new System.Drawing.Size(126, 23);
             this.BtnRandomGUID.TabIndex = 10;
@@ -182,7 +197,7 @@ namespace S5xTool
             this.CBRandomGUID.AutoSize = true;
             this.CBRandomGUID.Checked = true;
             this.CBRandomGUID.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.CBRandomGUID.Location = new System.Drawing.Point(145, 41);
+            this.CBRandomGUID.Location = new System.Drawing.Point(144, 41);
             this.CBRandomGUID.Name = "CBRandomGUID";
             this.CBRandomGUID.Size = new System.Drawing.Size(109, 17);
             this.CBRandomGUID.TabIndex = 11;
@@ -211,7 +226,7 @@ namespace S5xTool
             "MP max 14",
             "MP max 15",
             "MP max 16"});
-            this.ComboBox_MPType.Location = new System.Drawing.Point(206, 227);
+            this.ComboBox_MPType.Location = new System.Drawing.Point(204, 157);
             this.ComboBox_MPType.Name = "ComboBox_MPType";
             this.ComboBox_MPType.Size = new System.Drawing.Size(134, 21);
             this.ComboBox_MPType.TabIndex = 12;
@@ -225,20 +240,31 @@ namespace S5xTool
             "Base",
             "Extra 1",
             "Extra 2"});
-            this.ComboBox_Key.Location = new System.Drawing.Point(206, 254);
+            this.ComboBox_Key.Location = new System.Drawing.Point(204, 186);
             this.ComboBox_Key.Name = "ComboBox_Key";
             this.ComboBox_Key.Size = new System.Drawing.Size(134, 21);
             this.ComboBox_Key.TabIndex = 14;
             this.ComboBox_Key.SelectedIndexChanged += new System.EventHandler(this.ComboBox_Key_SelectedIndexChanged);
             // 
-            // LBLKey
+            // BtnPeek
             // 
-            LBLKey.AutoSize = true;
-            LBLKey.Location = new System.Drawing.Point(144, 257);
-            LBLKey.Name = "LBLKey";
-            LBLKey.Size = new System.Drawing.Size(43, 13);
-            LBLKey.TabIndex = 15;
-            LBLKey.Text = "AddOn:";
+            this.BtnPeek.Location = new System.Drawing.Point(144, 285);
+            this.BtnPeek.Name = "BtnPeek";
+            this.BtnPeek.Size = new System.Drawing.Size(134, 23);
+            this.BtnPeek.TabIndex = 16;
+            this.BtnPeek.Text = "Peek At";
+            this.BtnPeek.UseVisualStyleBackColor = true;
+            this.BtnPeek.Click += new System.EventHandler(this.BtnPeek_Click);
+            // 
+            // BtnReplaceImage
+            // 
+            this.BtnReplaceImage.Location = new System.Drawing.Point(12, 184);
+            this.BtnReplaceImage.Name = "BtnReplaceImage";
+            this.BtnReplaceImage.Size = new System.Drawing.Size(126, 23);
+            this.BtnReplaceImage.TabIndex = 17;
+            this.BtnReplaceImage.Text = "Replace Map Image";
+            this.BtnReplaceImage.UseVisualStyleBackColor = true;
+            this.BtnReplaceImage.Click += new System.EventHandler(this.BtnReplaceImage_Click);
             // 
             // S5xToolGUI
             // 
@@ -246,6 +272,8 @@ namespace S5xTool
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1224, 592);
+            this.Controls.Add(this.BtnReplaceImage);
+            this.Controls.Add(this.BtnPeek);
             this.Controls.Add(LBLKey);
             this.Controls.Add(this.ComboBox_Key);
             this.Controls.Add(LBLMPMode);
@@ -262,9 +290,6 @@ namespace S5xTool
             this.Controls.Add(this.BtnSave);
             this.Controls.Add(this.BtnLoad);
             this.Controls.Add(this.ListBox_Data);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
             this.Name = "S5xToolGUI";
             this.Text = "S5xTool";
             this.ResumeLayout(false);
@@ -290,6 +315,8 @@ namespace S5xTool
         private System.Windows.Forms.CheckBox CBRandomGUID;
         private System.Windows.Forms.ComboBox ComboBox_MPType;
         private System.Windows.Forms.ComboBox ComboBox_Key;
+        private System.Windows.Forms.Button BtnPeek;
+        private System.Windows.Forms.Button BtnReplaceImage;
     }
 }
 

@@ -16,17 +16,21 @@ namespace S5xTool
     public partial class S5xToolGUI : Form
     {
         private const string InfoXML = "maps\\externalmap\\info.xml";
+        private const string ExternalMapMain = "graphics\\textures\\gui\\mappics\\externalmap.png";
+        private const string ExternalMapLow = "graphics\\textureslow\\gui\\mappics\\externalmap.png";
+        private const string ExternalMapMed = "graphics\\texturesmed\\gui\\mappics\\externalmap.png";
         private BbaArchive Archive;
         private bool Updating = false;
+        private readonly FilePeek peek = new FilePeek();
 
         public S5xToolGUI()
         {
             InitializeComponent();
             Archive = new BbaArchive();
-            UpdateList();
+            UpdateList(false);
         }
 
-        private void UpdateList()
+        private void UpdateList(bool selectLast)
         {
             Updating = true;
             ListBox_Data.Items.Clear();
@@ -64,8 +68,10 @@ namespace S5xTool
                 ComboBox_MPType.SelectedIndex = -1;
                 ComboBox_Key.SelectedIndex = -1;
             }
-            ListBox_Data_SelectedIndexChanged(null, null);
+            if (selectLast)
+                ListBox_Data.SelectedIndex = ListBox_Data.Items.Count - 1;
             Updating = false;
+            ListBox_Data_SelectedIndexChanged(null, null);
         }
 
         private void BtnLoad_Click(object sender, EventArgs e)
@@ -86,7 +92,7 @@ namespace S5xTool
                 {
                     MessageBox.Show(ex.ToString());
                 }
-                UpdateList();
+                UpdateList(false);
             }
         }
 
@@ -100,12 +106,14 @@ namespace S5xTool
             if (ListBox_Data.SelectedItem is BbaFile f)
             {
                 Archive.RemoveFile(f.InternalPath);
-                UpdateList();
+                UpdateList(false);
             }
         }
 
         private void ListBox_Data_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (Updating)
+                return;
             Updating = true;
             bool enable;
             if (ListBox_Data.SelectedItem is BbaFile f)
@@ -122,6 +130,7 @@ namespace S5xTool
             BtnRenameTo.Enabled = enable;
             BtnRemove.Enabled = enable;
             BtnExportFile.Enabled = enable;
+            BtnPeek.Enabled = enable;
             BtnRandomGUID.Enabled = hasInfo;
             ComboBox_MPType.Enabled = hasInfo;
             ComboBox_Key.Enabled = hasInfo;
@@ -133,7 +142,7 @@ namespace S5xTool
             if (ListBox_Data.SelectedItem is BbaFile f)
             {
                 Archive.RenameFile(f.InternalPath, TB_Rename.Text);
-                UpdateList();
+                UpdateList(true);
             }
         }
 
@@ -150,7 +159,7 @@ namespace S5xTool
             string[] files = (string[]) e.Data.GetData(DataFormats.FileDrop);
             foreach (string s in files)
                 Archive.AddFileFromFilesystem(s, Path.GetFileName(s));
-            UpdateList();
+            UpdateList(true);
         }
 
         private void BtnAddFile_Click(object sender, EventArgs e)
@@ -160,7 +169,7 @@ namespace S5xTool
             {
                 string s = Dlg_Open.FileName;
                 Archive.AddFileFromFilesystem(s, Path.GetFileName(s));
-                UpdateList();
+                UpdateList(true);
             }
         }
 
@@ -176,7 +185,10 @@ namespace S5xTool
                     {
                         using (Stream s = new FileStream(Dlg_Save.FileName, FileMode.Create, FileAccess.Write))
                         {
-                            f.GetStream().CopyTo(s);
+                            using (Stream i = f.GetStream())
+                            {
+                                i.CopyTo(s);
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -211,12 +223,15 @@ namespace S5xTool
             BbaFile f = Archive.GetFileByName(InfoXML);
             if (f != null)
             {
-                XDocument doc = XDocument.Load(f.GetStream());
-                doc.Root.Element("GUID").Element("Data").Value = GenerateGUID();
-                MemoryStream s = new MemoryStream();
-                doc.Save(s);
-                Archive.AddFileFromMem(s.ToArray(), InfoXML);
-                UpdateList();
+                using (Stream st = f.GetStream())
+                {
+                    XDocument doc = XDocument.Load(st);
+                    doc.Root.Element("GUID").Element("Data").Value = GenerateGUID();
+                    MemoryStream s = new MemoryStream();
+                    doc.Save(s);
+                    Archive.AddFileFromMem(s.ToArray(), InfoXML);
+                    UpdateList(false);
+                }
             }
         }
 
@@ -239,13 +254,16 @@ namespace S5xTool
             BbaFile f = Archive.GetFileByName(InfoXML);
             if (f != null)
             {
-                XDocument doc = XDocument.Load(f.GetStream());
-                doc.Root.Element("MPFlag").Value = mp.ToString().ToLower();
-                doc.Root.Element("MPPlayerCount").Value = maxp.ToString();
-                MemoryStream s = new MemoryStream();
-                doc.Save(s);
-                Archive.AddFileFromMem(s.ToArray(), InfoXML);
-                UpdateList();
+                using (Stream st = f.GetStream())
+                {
+                    XDocument doc = XDocument.Load(st);
+                    doc.Root.Element("MPFlag").Value = mp.ToString().ToLower();
+                    doc.Root.Element("MPPlayerCount").Value = maxp.ToString();
+                    MemoryStream s = new MemoryStream();
+                    doc.Save(s);
+                    Archive.AddFileFromMem(s.ToArray(), InfoXML);
+                    UpdateList(true);
+                }
             }
             Updating = false;
         }
@@ -261,14 +279,42 @@ namespace S5xTool
             BbaFile f = Archive.GetFileByName(InfoXML);
             if (f != null)
             {
-                XDocument doc = XDocument.Load(f.GetStream());
-                doc.Root.Element("Key").Value = key.ToString();
-                MemoryStream s = new MemoryStream();
-                doc.Save(s);
-                Archive.AddFileFromMem(s.ToArray(), InfoXML);
-                UpdateList();
+                using (Stream st = f.GetStream())
+                {
+                    XDocument doc = XDocument.Load(st);
+                    doc.Root.Element("Key").Value = key.ToString();
+                    MemoryStream s = new MemoryStream();
+                    doc.Save(s);
+                    Archive.AddFileFromMem(s.ToArray(), InfoXML);
+                    UpdateList(true);
+                }
             }
             Updating = false;
+        }
+
+        private void BtnPeek_Click(object sender, EventArgs e)
+        {
+            if (ListBox_Data.SelectedItem is BbaFile f)
+            {
+                using (Stream st = f.GetStream())
+                {
+                    StreamReader re = new StreamReader(st);
+                    peek.ShowFilePeek(re.ReadToEnd());
+                }
+            }
+        }
+
+        private void BtnReplaceImage_Click(object sender, EventArgs e)
+        {
+            Dlg_Open.FilterIndex = 4;
+            if (Dlg_Open.ShowDialog() == DialogResult.OK)
+            {
+                Archive.AddFileFromFilesystem(Dlg_Open.FileName, ExternalMapMain);
+                BbaFile f = Archive.GetFileByName(ExternalMapMain);
+                Archive.CopyFile(f, ExternalMapMed);
+                Archive.CopyFile(f, ExternalMapLow);
+                UpdateList(false);
+            }
         }
     }
 }

@@ -75,5 +75,19 @@ namespace bbaToolS5
             StreamCache.RemoveRef(s);
             s = null;
         }
+
+        internal override BbaFile Clone()
+        {
+            return new BbaFileFromArchive()
+            {
+                InternalPath = InternalPath,
+                FileOffset = FileOffset,
+                FileLength = FileLength,
+                IsCompressed = IsCompressed,
+                SourceInternalPath = SourceInternalPath,
+                SourceFilePath = SourceFilePath,
+                ReadFrom = s
+            };
+        }
     }
 }

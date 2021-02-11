@@ -25,5 +25,14 @@ namespace bbaToolS5
         {
             return $"{InternalPath} <- {SourceFilePath}";
         }
+
+        internal override BbaFile Clone()
+        {
+            return new BbaFileFromFilesystem()
+            {
+                InternalPath = InternalPath,
+                SourceFilePath = SourceFilePath
+            };
+        }
     }
 }

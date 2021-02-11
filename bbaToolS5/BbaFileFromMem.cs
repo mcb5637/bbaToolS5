@@ -25,5 +25,14 @@ namespace bbaToolS5
         {
             return $"{InternalPath} <- Memory block, {Data.Length} bytes";
         }
+
+        internal override BbaFile Clone()
+        {
+            return new BbaFileFromMem()
+            {
+                InternalPath = InternalPath,
+                Data = Data
+            };
+        }
     }
 }

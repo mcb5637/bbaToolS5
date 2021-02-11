@@ -39,5 +39,7 @@ namespace bbaToolS5
         {
 
         }
+
+        internal abstract BbaFile Clone();
     }
 }
