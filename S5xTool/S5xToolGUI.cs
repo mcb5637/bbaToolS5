@@ -1,4 +1,5 @@
 ﻿using bbaToolS5;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -27,40 +28,52 @@ namespace S5xTool
         {
             InitializeComponent();
             Archive = new BbaArchive();
-            UpdateList(false);
+            UpdateList(false, -1);
         }
 
-        private void UpdateList(bool selectLast)
+        private void UpdateList(bool selectLast, int toSelect)
         {
             Updating = true;
             ListBox_Data.Items.Clear();
             bool setindex = false;
+            bool setPic = false;
             foreach (BbaFile f in Archive)
             {
                 ListBox_Data.Items.Add(f);
                 if (f.InternalPath == InfoXML)
                 {
-                    XDocument doc = XDocument.Load(f.GetStream());
-                    if (bool.TryParse(doc.Root.Element("MPFlag").Value, out bool mp) && mp)
+                    using (Stream stream = f.GetStream())
                     {
-                        if (int.TryParse(doc.Root.Element("MPPlayerCount").Value, out int mpcount))
+                        XDocument doc = XDocument.Load(stream);
+                        if (bool.TryParse(doc.Root.Element("MPFlag").Value, out bool mp) && mp)
                         {
-                            ComboBox_MPType.SelectedIndex = mpcount;
+                            if (int.TryParse(doc.Root.Element("MPPlayerCount").Value, out int mpcount))
+                            {
+                                ComboBox_MPType.SelectedIndex = mpcount;
+                            }
+                            else
+                            {
+                                ComboBox_MPType.SelectedIndex = 1;
+                            }
                         }
                         else
                         {
-                            ComboBox_MPType.SelectedIndex = 1;
+                            ComboBox_MPType.SelectedIndex = 0;
                         }
+                        if (int.TryParse(doc.Root.Element("Key")?.Value, out int key))
+                            ComboBox_Key.SelectedIndex = key;
+                        else
+                            ComboBox_Key.SelectedIndex = -1;
+                        setindex = true; 
                     }
-                    else
+                }
+                else if (f.InternalPath == ExternalMapMain)
+                {
+                    using (Stream stream = f.GetStream())
                     {
-                        ComboBox_MPType.SelectedIndex = 0;
+                        PicBoxPreviewImg.Image = Image.FromStream(stream);
+                        setPic = true;
                     }
-                    if (int.TryParse(doc.Root.Element("Key").Value, out int key))
-                        ComboBox_Key.SelectedIndex = key;
-                    else
-                        ComboBox_Key.SelectedIndex = -1;
-                    setindex = true;
                 }
             }
             if (!setindex)
@@ -68,8 +81,12 @@ namespace S5xTool
                 ComboBox_MPType.SelectedIndex = -1;
                 ComboBox_Key.SelectedIndex = -1;
             }
+            if (!setPic)
+                PicBoxPreviewImg.Image = null;
             if (selectLast)
                 ListBox_Data.SelectedIndex = ListBox_Data.Items.Count - 1;
+            else if (toSelect > 0)
+                ListBox_Data.SelectedIndex = toSelect;
             Updating = false;
             ListBox_Data_SelectedIndexChanged(null, null);
         }
@@ -92,7 +109,7 @@ namespace S5xTool
                 {
                     MessageBox.Show(ex.ToString());
                 }
-                UpdateList(false);
+                UpdateList(false, -1);
             }
         }
 
@@ -106,7 +123,7 @@ namespace S5xTool
             if (ListBox_Data.SelectedItem is BbaFile f)
             {
                 Archive.RemoveFile(f.InternalPath);
-                UpdateList(false);
+                UpdateList(false, -1);
             }
         }
 
@@ -141,8 +158,9 @@ namespace S5xTool
         {
             if (ListBox_Data.SelectedItem is BbaFile f)
             {
+                int s = ListBox_Data.SelectedIndex;
                 Archive.RenameFile(f.InternalPath, TB_Rename.Text);
-                UpdateList(true);
+                UpdateList(false, s);
             }
         }
 
@@ -159,7 +177,7 @@ namespace S5xTool
             string[] files = (string[]) e.Data.GetData(DataFormats.FileDrop);
             foreach (string s in files)
                 Archive.AddFileFromFilesystem(s, Path.GetFileName(s));
-            UpdateList(true);
+            UpdateList(true, -1);
         }
 
         private void BtnAddFile_Click(object sender, EventArgs e)
@@ -169,7 +187,7 @@ namespace S5xTool
             {
                 string s = Dlg_Open.FileName;
                 Archive.AddFileFromFilesystem(s, Path.GetFileName(s));
-                UpdateList(true);
+                UpdateList(true, -1);
             }
         }
 
@@ -230,7 +248,7 @@ namespace S5xTool
                     MemoryStream s = new MemoryStream();
                     doc.Save(s);
                     Archive.AddFileFromMem(s.ToArray(), InfoXML);
-                    UpdateList(false);
+                    UpdateList(sender != null, -1);
                 }
             }
         }
@@ -262,7 +280,7 @@ namespace S5xTool
                     MemoryStream s = new MemoryStream();
                     doc.Save(s);
                     Archive.AddFileFromMem(s.ToArray(), InfoXML);
-                    UpdateList(true);
+                    UpdateList(true, -1);
                 }
             }
             Updating = false;
@@ -282,11 +300,18 @@ namespace S5xTool
                 using (Stream st = f.GetStream())
                 {
                     XDocument doc = XDocument.Load(st);
-                    doc.Root.Element("Key").Value = key.ToString();
+                    if (doc.Root.Element("Key")==null)
+                    {
+                        doc.Root.Add(new XElement("Key", key.ToString()));
+                    }
+                    else
+                    {
+                        doc.Root.Element("Key").Value = key.ToString();
+                    }
                     MemoryStream s = new MemoryStream();
                     doc.Save(s);
                     Archive.AddFileFromMem(s.ToArray(), InfoXML);
-                    UpdateList(true);
+                    UpdateList(true, -1);
                 }
             }
             Updating = false;
@@ -309,11 +334,113 @@ namespace S5xTool
             Dlg_Open.FilterIndex = 4;
             if (Dlg_Open.ShowDialog() == DialogResult.OK)
             {
-                Archive.AddFileFromFilesystem(Dlg_Open.FileName, ExternalMapMain);
-                BbaFile f = Archive.GetFileByName(ExternalMapMain);
-                Archive.CopyFile(f, ExternalMapMed);
-                Archive.CopyFile(f, ExternalMapLow);
-                UpdateList(false);
+                ReplaceImage(Dlg_Open.FileName);
+                UpdateList(false, -1);
+            }
+        }
+
+        private void ReplaceImage(string n)
+        {
+            Archive.AddFileFromFilesystem(n, ExternalMapMain);
+            BbaFile f = Archive.GetFileByName(ExternalMapMain);
+            Archive.CopyFile(f, ExternalMapMed);
+            Archive.CopyFile(f, ExternalMapLow);
+        }
+
+        private void BtnLoadEx2Bbas_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string p = Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Blue Byte\\The Settlers - Heritage of Kings", "InstallPath", null) as string;
+                if (p == null)
+                {
+                    MessageBox.Show("registry not set", "error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                Archive.Clear();
+                Archive.ReadBba(Path.Combine(p, "base\\data.bba"));
+                Archive.ReadBba(Path.Combine(p, "base\\lang.bba"));
+                Archive.ReadBba(Path.Combine(p, "extra2\\bba\\patch.bba"));
+                Archive.ReadBba(Path.Combine(p, "extra2\\bba\\lang.bba"));
+                Archive.ReadBba(Path.Combine(p, "extra2\\bba\\data.bba"));
+                Archive.ReadBba(Path.Combine(p, "extra2\\bba\\patche2.bba"));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            UpdateList(false, -1);
+        }
+
+        private void BtnSort_Click(object sender, EventArgs e)
+        {
+            Archive.SortFiles();
+            UpdateList(false, -1);
+        }
+
+        private void BtnLoadFolder_Click(object sender, EventArgs e)
+        {
+            if (Dlg_Folder.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    if (!CB_LoadMerge.Checked)
+                        Archive.Clear();
+                    Archive.ReadFromFolder(Dlg_Folder.SelectedPath);
+                    UpdateList(false, -1);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString());
+                }
+            }
+        }
+
+        private void BtnSaveFolder_Click(object sender, EventArgs e)
+        {
+            if (Dlg_Folder.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    Archive.WriteToFolder(Dlg_Folder.SelectedPath);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString());
+                }
+            }
+        }
+
+        private void BtnImportFolderMap_Click(object sender, EventArgs e)
+        {
+            Dlg_Open.FilterIndex = 5;
+            if (Dlg_Open.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    if (!CB_LoadMerge.Checked)
+                        Archive.Clear();
+                    string x = "maps\\externalmap\\";
+                    string extmap = Path.GetFileName(Path.GetDirectoryName(Dlg_Open.FileName)) + ".png";
+                    //MessageBox.Show(dirname);
+                    foreach (string f in Directory.GetFiles(Path.GetDirectoryName(Dlg_Open.FileName)))
+                    {
+                        string n = Path.GetFileName(f);
+                        if (n==extmap)
+                        {
+                            ReplaceImage(f);
+                        }
+                        else
+                        {
+                            Archive.AddFileFromFilesystem(f, x + n);
+                        }
+                    }
+                    UpdateList(false, -1);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString());
+                }
             }
         }
     }

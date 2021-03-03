@@ -76,6 +76,11 @@ namespace bbaToolS5
             return false;
         }
 
+        public void SortFiles()
+        {
+            Contents.Sort();
+        }
+
         private string FixPath(string path)
         {
             return path.ToLower().Replace("/", "\\");
