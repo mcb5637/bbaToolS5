@@ -84,13 +84,13 @@ namespace S5xTool
                 TBPath1.Text, TBPath2.Text, TBPath3.Text
             }, new bool[] {
                 CBInArchive1.Checked, CBInArchive2.Checked, CBInArchive3.Checked
-            }, CBCopy.Checked, CBAddLoader.Checked, ref log);
+            }, CBCopy.Checked, CBAddLoader.Checked, CBCompile.Checked, ref log);
             if (log.Length > 0)
                 MessageBox.Show(log);
             Close();
         }
 
-        internal static void ProcessScript(BbaArchive a, string oufile, string infile, string[] paths, bool[] isarch, bool copy, bool addloader, ref string log)
+        internal static void ProcessScript(BbaArchive a, string oufile, string infile, string[] paths, bool[] isarch, bool copy, bool addloader, bool compile, ref string log)
         {
             LinkedList<string> def = new LinkedList<string>();
             if (copy)
@@ -105,23 +105,23 @@ namespace S5xTool
                 wr.WriteLine("-- Warnung: Mapscript und weitere Mapdaten in diesem Archiv als extra Dateien enthalten. Nicht im Editor Speichern!");
                 if (copy)
                 {
-                    wr.WriteLine("Script.Load(\"data/maps/externalmap/mapscript_packed.lua\")");
+                    wr.WriteLine($"Script.Load(\"data/maps/externalmap/mapscript_packed.lua{(compile ? "c" : "")}\")");
                 }
                 else
                 {
-                    ProcessSingleFile(a, "s5CommunityLib/packer/devLoad", "s5CommunityLib/packer/devLoad", paths, isarch, new LinkedList<string>(), def, copy, null, ref log);
-                    wr.WriteLine("Script.Load(\"data/maps/externalmap/s5CommunityLib/packer/devLoad.lua\")");
-                    wr.WriteLine("mcbPacker.Paths = {{\"data/maps/externalmap/\", \".lua\"}}");
+                    ProcessSingleFile(a, "s5CommunityLib/packer/devLoad", "s5CommunityLib/packer/devLoad", paths, isarch, new LinkedList<string>(), def, copy, null, compile, ref log);
+                    wr.WriteLine($"Script.Load(\"data/maps/externalmap/s5CommunityLib/packer/devLoad.lua{(compile ? "c" : "")}\")");
+                    wr.WriteLine($"mcbPacker.Paths = {{\"data/maps/externalmap/\", \".lua{(compile ? "c" : "")}\"}}");
                     wr.WriteLine("mcbPacker.require(\"mapscript_packed\")");
                 }
                 wr.Flush();
                 a.AddFileFromMem(ms.ToArray(), "maps/externalmap/mapscript.lua");
             }
-            ProcessSingleFile(a, of, infile, paths, isarch, new LinkedList<string>(), def, copy, null, ref log);
+            ProcessSingleFile(a, of, infile, paths, isarch, new LinkedList<string>(), def, copy, null, compile, ref log);
         }
 
         private static void ProcessSingleFile(BbaArchive a, string oufile, string infile, string[] paths, bool[] isarch,
-            LinkedList<string> loaded, LinkedList<string> defines, bool copytogether, MemoryStream copy, ref string log)
+            LinkedList<string> loaded, LinkedList<string> defines, bool copytogether, MemoryStream copy, bool compile, ref string log)
         {
             loaded.AddLast(infile);
             MemoryStream m = (copytogether && copy!=null) ? copy : new MemoryStream();
@@ -154,17 +154,21 @@ namespace S5xTool
                         if (!loaded.Contains(req.Groups["f"].Value))
                         {
                             //log += $"Info: loading {req.Groups["f"].Value} from {infile}\n";
-                            ProcessSingleFile(a, req.Groups["f"].Value, req.Groups["f"].Value, paths, isarch, loaded, defines, copytogether, m, ref log);
+                            wr.Flush();
+                            ProcessSingleFile(a, req.Groups["f"].Value, req.Groups["f"].Value, paths, isarch, loaded, defines, copytogether, m, compile, ref log);
                         }
+                        if (copytogether)
+                            writeline = false;
                     }
                     else if (force1.Success)
                     {
                         //log += $"Info: force load {force1.Groups["f"].Value} from {infile}\n";
-                        ProcessSingleFile(a, force1.Groups["f"].Value, force1.Groups["f"].Value, paths, isarch, new LinkedList<string>(), defines, copytogether, null, ref log);
+                        wr.Flush();
+                        ProcessSingleFile(a, force1.Groups["f"].Value, force1.Groups["f"].Value, paths, isarch, new LinkedList<string>(), defines, copytogether, null, compile, ref log);
                         if (copytogether)
                         {
                             writeline = false;
-                            wr.WriteLine($"Script.Load(\"data/maps/externalmap/{force1.Groups["f"].Value}.lua\")");
+                            wr.WriteLine($"Script.Load(\"data/maps/externalmap/{force1.Groups["f"].Value}.lua{(compile ? "c" : "")}\")");
                         }
                     }
                     else if (force2.Success)
@@ -173,7 +177,7 @@ namespace S5xTool
                         if (copytogether)
                         {
                             writeline = false;
-                            wr.WriteLine($"Script.Load(\"data/maps/externalmap/\"..{force2.Groups["f"].Value}..\".lua\")");
+                            wr.WriteLine($"Script.Load(\"data/maps/externalmap/\"..{force2.Groups["f"].Value}..\".lua{(compile ? "c" : "")}\")");
                         }
                     }
                     else if (Regex.Match(line, "\\-\\-mcbPacker\\.ignore$").Success)
@@ -241,7 +245,12 @@ namespace S5xTool
 
             wr.Flush();
             if (!(copytogether && copy != null))
-                a.AddFileFromMem(m.ToArray(), "maps\\externalmap\\" + oufile + ".lua");
+            {
+                byte[] data = m.ToArray();
+                if (compile)
+                    data = CompileFile(data, oufile);
+                a.AddFileFromMem(data, $"maps\\externalmap\\{oufile}.lua{(compile ? "c" : "")}");
+            }
         }
 
         private static Stream SearchFile(BbaArchive a, string[] paths, bool[] isarch, string name)
@@ -276,6 +285,17 @@ namespace S5xTool
                 }
             }
             return null;
+        }
+
+        internal static byte[] CompileFile(byte[] data, string name)
+        {
+            LuaState50 L = new LuaState50();
+            LuaState50.LuaResult r = L.LoadBuffer(data, name);
+            if (r != LuaState50.LuaResult.OK)
+            {
+                throw new ArgumentException($"lua error: {r} {L.ToString(-1)}");
+            }
+            return L.Dump();
         }
     }
 }

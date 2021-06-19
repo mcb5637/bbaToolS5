@@ -39,9 +39,9 @@ namespace S5xTool
             this.TbInFile = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.CBInArchive1 = new System.Windows.Forms.CheckBox();
-            this.TBPath1 = new System.Windows.Forms.TextBox();
             this.BTNPath1 = new System.Windows.Forms.Button();
+            this.TBPath1 = new System.Windows.Forms.TextBox();
+            this.CBInArchive1 = new System.Windows.Forms.CheckBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.BTNPath2 = new System.Windows.Forms.Button();
             this.TBPath2 = new System.Windows.Forms.TextBox();
@@ -54,6 +54,7 @@ namespace S5xTool
             this.OpenFolder = new System.Windows.Forms.FolderBrowserDialog();
             this.CBCopy = new System.Windows.Forms.CheckBox();
             this.CBAddLoader = new System.Windows.Forms.CheckBox();
+            this.CBCompile = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -151,23 +152,6 @@ namespace S5xTool
             this.groupBox1.TabIndex = 10;
             this.groupBox1.TabStop = false;
             // 
-            // CBInArchive1
-            // 
-            this.CBInArchive1.AutoSize = true;
-            this.CBInArchive1.Location = new System.Drawing.Point(6, 19);
-            this.CBInArchive1.Name = "CBInArchive1";
-            this.CBInArchive1.Size = new System.Drawing.Size(74, 17);
-            this.CBInArchive1.TabIndex = 0;
-            this.CBInArchive1.Text = "In Archive";
-            this.CBInArchive1.UseVisualStyleBackColor = true;
-            // 
-            // TBPath1
-            // 
-            this.TBPath1.Location = new System.Drawing.Point(86, 17);
-            this.TBPath1.Name = "TBPath1";
-            this.TBPath1.Size = new System.Drawing.Size(218, 20);
-            this.TBPath1.TabIndex = 1;
-            // 
             // BTNPath1
             // 
             this.BTNPath1.Location = new System.Drawing.Point(310, 15);
@@ -177,6 +161,23 @@ namespace S5xTool
             this.BTNPath1.Text = "Open";
             this.BTNPath1.UseVisualStyleBackColor = true;
             this.BTNPath1.Click += new System.EventHandler(this.BTNPath1_Click);
+            // 
+            // TBPath1
+            // 
+            this.TBPath1.Location = new System.Drawing.Point(86, 17);
+            this.TBPath1.Name = "TBPath1";
+            this.TBPath1.Size = new System.Drawing.Size(218, 20);
+            this.TBPath1.TabIndex = 1;
+            // 
+            // CBInArchive1
+            // 
+            this.CBInArchive1.AutoSize = true;
+            this.CBInArchive1.Location = new System.Drawing.Point(6, 19);
+            this.CBInArchive1.Name = "CBInArchive1";
+            this.CBInArchive1.Size = new System.Drawing.Size(74, 17);
+            this.CBInArchive1.TabIndex = 0;
+            this.CBInArchive1.Text = "In Archive";
+            this.CBInArchive1.UseVisualStyleBackColor = true;
             // 
             // groupBox2
             // 
@@ -283,11 +284,22 @@ namespace S5xTool
             this.CBAddLoader.Text = "Add Loader";
             this.CBAddLoader.UseVisualStyleBackColor = true;
             // 
+            // CBCompile
+            // 
+            this.CBCompile.AutoSize = true;
+            this.CBCompile.Location = new System.Drawing.Point(686, 213);
+            this.CBCompile.Name = "CBCompile";
+            this.CBCompile.Size = new System.Drawing.Size(63, 17);
+            this.CBCompile.TabIndex = 15;
+            this.CBCompile.Text = "Compile";
+            this.CBCompile.UseVisualStyleBackColor = true;
+            // 
             // ScriptPacker
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.CBCompile);
             this.Controls.Add(this.CBAddLoader);
             this.Controls.Add(this.CBCopy);
             this.Controls.Add(this.groupBox3);
@@ -342,5 +354,6 @@ namespace S5xTool
         private System.Windows.Forms.FolderBrowserDialog OpenFolder;
         private System.Windows.Forms.CheckBox CBCopy;
         private System.Windows.Forms.CheckBox CBAddLoader;
+        private System.Windows.Forms.CheckBox CBCompile;
     }
 }

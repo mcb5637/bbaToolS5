@@ -52,6 +52,7 @@
     <Compile Include="FilePeek.Designer.cs">
       <DependentUpon>FilePeek.cs</DependentUpon>
     </Compile>
+    <Compile Include="LuaState50.cs" />
     <Compile Include="S5xToolGUI.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -102,6 +103,14 @@
       <Project>{d4fbaf03-f798-4a9d-857a-fa8d1c62da36}</Project>
       <Name>bbaToolS5</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="lua50\bin2c50.exe" />
+    <Content Include="lua50\lua50.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="lua50\lua50.exe" />
+    <Content Include="lua50\luac50.exe" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -151,7 +151,8 @@ namespace S5xTool
             BtnRandomGUID.Enabled = hasInfo;
             ComboBox_MPType.Enabled = hasInfo;
             ComboBox_Key.Enabled = hasInfo;
-            BtnPackScript.Enabled = hasInfo && TB_Rename.Text.EndsWith(".lua");
+            BtnPackScript.Enabled = enable && TB_Rename.Text.EndsWith(".lua");
+            BtnCompile.Enabled = enable && TB_Rename.Text.EndsWith(".lua");
             Updating = false;
         }
 
@@ -451,6 +452,23 @@ namespace S5xTool
             {
                 new ScriptPacker().ShowPacker(Archive, f.InternalPath);
                 UpdateList(false, -1);
+            }
+        }
+
+        private void BtnCompile_Click(object sender, EventArgs e)
+        {
+            if (ListBox_Data.SelectedItem is BbaFile f)
+            {
+                try
+                {
+                    byte[] nd = ScriptPacker.CompileFile(f.GetBytes(), f.InternalPath);
+                    Archive.AddFileFromMem(nd, f.InternalPath);
+                    UpdateList(false, ListBox_Data.SelectedIndex);
+                }
+                catch (ArgumentException er)
+                {
+                    MessageBox.Show(er.Message);
+                }
             }
         }
     }
