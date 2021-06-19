@@ -56,6 +56,7 @@ namespace S5xTool
             this.BtnSaveFolder = new System.Windows.Forms.Button();
             this.BtnImportFolderMap = new System.Windows.Forms.Button();
             this.PicBoxPreviewImg = new System.Windows.Forms.PictureBox();
+            this.BtnPackScript = new System.Windows.Forms.Button();
             LBLMPMode = new System.Windows.Forms.Label();
             LBLKey = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.PicBoxPreviewImg)).BeginInit();
@@ -332,12 +333,23 @@ namespace S5xTool
             this.PicBoxPreviewImg.TabIndex = 23;
             this.PicBoxPreviewImg.TabStop = false;
             // 
+            // BtnPackScript
+            // 
+            this.BtnPackScript.Location = new System.Drawing.Point(284, 332);
+            this.BtnPackScript.Name = "BtnPackScript";
+            this.BtnPackScript.Size = new System.Drawing.Size(133, 23);
+            this.BtnPackScript.TabIndex = 24;
+            this.BtnPackScript.Text = "PackScript";
+            this.BtnPackScript.UseVisualStyleBackColor = true;
+            this.BtnPackScript.Click += new System.EventHandler(this.BtnPackScript_Click);
+            // 
             // S5xToolGUI
             // 
             this.AcceptButton = this.BtnRenameTo;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1224, 592);
+            this.Controls.Add(this.BtnPackScript);
             this.Controls.Add(this.PicBoxPreviewImg);
             this.Controls.Add(this.BtnImportFolderMap);
             this.Controls.Add(this.BtnSaveFolder);
@@ -397,6 +409,7 @@ namespace S5xTool
         private System.Windows.Forms.Button BtnSaveFolder;
         private System.Windows.Forms.Button BtnImportFolderMap;
         private System.Windows.Forms.PictureBox PicBoxPreviewImg;
+        private System.Windows.Forms.Button BtnPackScript;
     }
 }
 
