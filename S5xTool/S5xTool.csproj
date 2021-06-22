@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArchiveAccess.cs" />
     <Compile Include="FilePeek.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -53,6 +54,7 @@
       <DependentUpon>FilePeek.cs</DependentUpon>
     </Compile>
     <Compile Include="LuaState50.cs" />
+    <Compile Include="LuaState.cs" />
     <Compile Include="S5xToolGUI.cs">
       <SubType>Form</SubType>
     </Compile>

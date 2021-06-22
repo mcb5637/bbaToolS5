@@ -58,6 +58,7 @@ namespace S5xTool
             this.PicBoxPreviewImg = new System.Windows.Forms.PictureBox();
             this.BtnPackScript = new System.Windows.Forms.Button();
             this.BtnCompile = new System.Windows.Forms.Button();
+            this.BtnLuaMakro = new System.Windows.Forms.Button();
             LBLMPMode = new System.Windows.Forms.Label();
             LBLKey = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.PicBoxPreviewImg)).BeginInit();
@@ -119,7 +120,8 @@ namespace S5xTool
             // 
             // Dlg_Open
             // 
-            this.Dlg_Open.Filter = "Maps|*.s5x|Archives|*.bba|All|*.*|Map Images|*.png|Import Map|info.xml";
+            this.Dlg_Open.Filter = "Maps|*.s5x|Archives|*.bba|All|*.*|Map Images|*.png|Import Map|info.xml|Lua Script" +
+    "|*.lua";
             // 
             // CB_LoadMerge
             // 
@@ -354,12 +356,23 @@ namespace S5xTool
             this.BtnCompile.UseVisualStyleBackColor = true;
             this.BtnCompile.Click += new System.EventHandler(this.BtnCompile_Click);
             // 
+            // BtnLuaMakro
+            // 
+            this.BtnLuaMakro.Location = new System.Drawing.Point(284, 552);
+            this.BtnLuaMakro.Name = "BtnLuaMakro";
+            this.BtnLuaMakro.Size = new System.Drawing.Size(208, 23);
+            this.BtnLuaMakro.TabIndex = 26;
+            this.BtnLuaMakro.Text = "Execute Lua Makro";
+            this.BtnLuaMakro.UseVisualStyleBackColor = true;
+            this.BtnLuaMakro.Click += new System.EventHandler(this.BtnLuaMakro_Click);
+            // 
             // S5xToolGUI
             // 
             this.AcceptButton = this.BtnRenameTo;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1224, 592);
+            this.Controls.Add(this.BtnLuaMakro);
             this.Controls.Add(this.BtnCompile);
             this.Controls.Add(this.BtnPackScript);
             this.Controls.Add(this.PicBoxPreviewImg);
@@ -423,6 +436,7 @@ namespace S5xTool
         private System.Windows.Forms.PictureBox PicBoxPreviewImg;
         private System.Windows.Forms.Button BtnPackScript;
         private System.Windows.Forms.Button BtnCompile;
+        private System.Windows.Forms.Button BtnLuaMakro;
     }
 }
 

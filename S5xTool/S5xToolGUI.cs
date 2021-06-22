@@ -23,12 +23,14 @@ namespace S5xTool
         private BbaArchive Archive;
         private bool Updating = false;
         private readonly FilePeek peek = new FilePeek();
+        private LuaState L = new LuaState50();
 
         public S5xToolGUI()
         {
             InitializeComponent();
             Archive = new BbaArchive();
             UpdateList(false, -1);
+            AddLuaFuncs();
         }
 
         private void UpdateList(bool selectLast, int toSelect)
@@ -240,19 +242,66 @@ namespace S5xTool
 
         private void BtnRandomGUID_Click(object sender, EventArgs e)
         {
-            BbaFile f = Archive.GetFileByName(InfoXML);
+            try
+            {
+                if (SetGUID(Archive, GenerateGUID()))
+                    UpdateList(sender != null, -1);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private bool SetGUID(BbaArchive ar, string guid)
+        {
+            BbaFile f = ar.GetFileByName(InfoXML);
             if (f != null)
             {
                 using (Stream st = f.GetStream())
                 {
                     XDocument doc = XDocument.Load(st);
-                    doc.Root.Element("GUID").Element("Data").Value = GenerateGUID();
+                    doc.Root.Element("GUID").Element("Data").Value = guid;
                     MemoryStream s = new MemoryStream();
                     doc.Save(s);
-                    Archive.AddFileFromMem(s.ToArray(), InfoXML);
-                    UpdateList(sender != null, -1);
+                    ar.AddFileFromMem(s.ToArray(), InfoXML);
+                    return true;
                 }
             }
+            return false;
+        }
+        private bool SetNameAndText(BbaArchive ar, string name, string text)
+        {
+            BbaFile f = ar.GetFileByName(InfoXML);
+            if (f != null)
+            {
+                using (Stream st = f.GetStream())
+                {
+                    XDocument doc = XDocument.Load(st);
+                    doc.Root.Element("Name").Value = name;
+                    doc.Root.Element("Desc").Value = text;
+                    MemoryStream s = new MemoryStream();
+                    doc.Save(s);
+                    ar.AddFileFromMem(s.ToArray(), InfoXML);
+                    return true;
+                }
+            }
+            return false;
+        }
+        private string GetNameAndText(BbaArchive ar, out string name)
+        {
+            BbaFile f = ar.GetFileByName(InfoXML);
+            if (f != null)
+            {
+                using (Stream st = f.GetStream())
+                {
+                    XDocument doc = XDocument.Load(st);
+                    name = doc.Root.Element("Name").Value;
+                    return doc.Root.Element("Desc").Value;
+                }
+            }
+            name = null;
+            return null;
         }
 
         private static string GenerateGUID()
@@ -450,7 +499,7 @@ namespace S5xTool
         {
             if (ListBox_Data.SelectedItem is BbaFile f)
             {
-                new ScriptPacker().ShowPacker(Archive, f.InternalPath);
+                new ScriptPacker().ShowPacker(Archive, f.InternalPath, L);
                 UpdateList(false, -1);
             }
         }
@@ -461,13 +510,139 @@ namespace S5xTool
             {
                 try
                 {
-                    byte[] nd = ScriptPacker.CompileFile(f.GetBytes(), f.InternalPath);
+                    byte[] nd = ScriptPacker.CompileFile(L, f.GetBytes(), f.InternalPath);
                     Archive.AddFileFromMem(nd, f.InternalPath);
                     UpdateList(false, ListBox_Data.SelectedIndex);
                 }
                 catch (LuaError er)
                 {
                     MessageBox.Show(er.Message);
+                }
+            }
+        }
+
+        private void AddLuaFuncs()
+        {
+            L.RegisterType<ArchiveAccess>();
+            L.Push("NewArchive");
+            L.Push((s) =>
+            {
+                s.PushObject(new ArchiveAccess());
+                return 1;
+            });
+            L.SetTable(L.GLOBALSINDEX);
+            L.Push("SetArchiveForUI");
+            L.Push((s) =>
+            {
+                BbaArchive a = s.GetObject<ArchiveAccess>(1).A;
+                if (a != Archive)
+                {
+                    Archive.Clear(); // speed up GC
+                    Archive = a;
+                }
+                UpdateList(false, -1);
+                return 0;
+            });
+            L.SetTable(L.GLOBALSINDEX);
+            L.Push("GetArchiveForUI");
+            L.Push((s) =>
+            {
+                s.PushObject(Archive);
+                return 1;
+            });
+            L.SetTable(L.GLOBALSINDEX);
+            L.Push("GenerateGUID");
+            L.Push((s) =>
+            {
+                s.Push(GenerateGUID());
+                return 1;
+            });
+            L.SetTable(L.GLOBALSINDEX);
+            L.Push("MapFileSetGUID");
+            L.Push((s) =>
+            {
+                BbaArchive a = s.GetObject<ArchiveAccess>(1).A;
+                if (!SetGUID(a, s.ToString(2)))
+                    throw new LuaError("no info.xml found");
+                return 0;
+            });
+            L.SetTable(L.GLOBALSINDEX);
+            L.Push("MapFileGetNameAndText");
+            L.Push((s) =>
+            {
+                BbaArchive a = s.GetObject<ArchiveAccess>(1).A;
+                string n, t;
+                t = GetNameAndText(a, out n);
+                if (n != null)
+                {
+                    s.Push(n);
+                    s.Push(t);
+                }
+                else
+                {
+                    s.Push();
+                    s.Push();
+                }
+                return 2;
+            });
+            L.SetTable(L.GLOBALSINDEX);
+            L.Push("MapFileSetNameAndText");
+            L.Push((s) =>
+            {
+                BbaArchive a = s.GetObject<ArchiveAccess>(1).A;
+                if (!SetNameAndText(a, s.ToString(2), s.ToString(3)))
+                    throw new LuaError("no info.xml found");
+                return 0;
+            });
+            L.SetTable(L.GLOBALSINDEX);
+            L.Push("PackLuaScript");
+            L.Push((s) =>
+            {
+                BbaArchive a = s.GetObject<ArchiveAccess>(1).A;
+                int x = s.Top;
+                string ofile = s.ToString(2);
+                string ifile = s.ToString(3);
+                string log = "";
+                List<string> path = new List<string>();
+                List<bool> isarch = new List<bool>();
+                foreach (int i in s.IPairs(4))
+                {
+                    s.Push("Path");
+                    s.RawGet(-2);
+                    path.Add(s.ToString(-1));
+                    s.Pop(1);
+                    s.Push("InArchive");
+                    s.RawGet(-2);
+                    isarch.Add(s.ToBoolean(-1));
+                    s.Pop(1);
+                }
+                x = s.Top;
+                bool copy = s.ToBoolean(5);
+                bool addloader = s.ToBoolean(6);
+                bool compile = s.ToBoolean(7);
+                s.Top = 0;
+                ScriptPacker.ProcessScript(a, ofile, ifile, path.ToArray(), isarch.ToArray(), copy, addloader, compile, s, ref log);
+
+                s.Push(log);
+                return 1;
+            });
+            L.SetTable(L.GLOBALSINDEX);
+        }
+
+        private void BtnLuaMakro_Click(object sender, EventArgs e)
+        {
+            Dlg_Open.FilterIndex = 6;
+            if (Dlg_Open.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    string s = File.ReadAllText(Dlg_Open.FileName);
+                    L.LoadBuffer(s, Path.GetFileName(Dlg_Open.FileName));
+                    L.PCall(0, 0);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString());
                 }
             }
         }
