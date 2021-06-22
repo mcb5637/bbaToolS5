@@ -95,6 +95,8 @@ namespace S5xTool
             LinkedList<string> def = new LinkedList<string>();
             if (copy)
                 def.AddLast("CopyToOneFile");
+            if (compile)
+                def.AddLast("Compile");
             string of = oufile;
             if (of == "mapscript" && addloader)
             {
@@ -192,7 +194,7 @@ namespace S5xTool
                     else if (def.Success)
                     {
                         writeline = false;
-                        if (def.Groups["f"].Value == "CopyToOneFile")
+                        if (def.Groups["f"].Value == "CopyToOneFile" && def.Groups["f"].Value == "Compile")
                         {
                             log += $"ERROR: tried to define {def.Groups["f"].Value} from {infile}\n";
                         }
@@ -204,7 +206,7 @@ namespace S5xTool
                     }
                     else if (udef.Success)
                     {
-                        if (udef.Groups["f"].Value == "CopyToOneFile")
+                        if (udef.Groups["f"].Value == "CopyToOneFile" && def.Groups["f"].Value == "Compile")
                         {
                             log += $"ERROR: tried to undefine {udef.Groups["f"].Value} from {infile}\n";
                         }
@@ -248,7 +250,17 @@ namespace S5xTool
             {
                 byte[] data = m.ToArray();
                 if (compile)
-                    data = CompileFile(data, oufile);
+                {
+                    try
+                    {
+                        data = CompileFile(data, oufile);
+                    }
+                    catch (LuaError e)
+                    {
+                        log += $"Error: lua compile: {e.Message}\n";
+                    }
+                }
+
                 a.AddFileFromMem(data, $"maps\\externalmap\\{oufile}.lua{(compile ? "c" : "")}");
             }
         }
@@ -290,12 +302,10 @@ namespace S5xTool
         internal static byte[] CompileFile(byte[] data, string name)
         {
             LuaState50 L = new LuaState50();
-            LuaState50.LuaResult r = L.LoadBuffer(data, name);
-            if (r != LuaState50.LuaResult.OK)
-            {
-                throw new ArgumentException($"lua error: {r} {L.ToString(-1)}");
-            }
-            return L.Dump();
+            L.LoadBuffer(data, name);
+            byte[] r = L.Dump();
+            L.Pop(1);
+            return r;
         }
     }
 }

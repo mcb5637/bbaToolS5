@@ -465,7 +465,7 @@ namespace S5xTool
                     Archive.AddFileFromMem(nd, f.InternalPath);
                     UpdateList(false, ListBox_Data.SelectedIndex);
                 }
-                catch (ArgumentException er)
+                catch (LuaError er)
                 {
                     MessageBox.Show(er.Message);
                 }
