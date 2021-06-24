@@ -225,7 +225,13 @@ namespace S5xTool
             CheckType(ind, LuaType.String);
             return Marshal.PtrToStringAnsi(Lua_tostring(State, ind));
         }
-        // cfunc, udata, thread, pointer
+        public override IntPtr ToUserdata(int ind)
+        {
+            CheckIndex(ind);
+            CheckType(ind, LuaType.UserData, LuaType.LightUserData);
+            return Lua_touserdata(State, ind);
+        }
+        // cfunc, thread, pointer
 
         // push to stack
         [DllImport("lua50/lua50.dll", EntryPoint = "lua_pushboolean", CallingConvention = CallingConvention.Cdecl)]
@@ -412,6 +418,11 @@ namespace S5xTool
                 throw new LuaError("no key on stack");
             Lua_rawget(State, i);
         }
+        public override void RawGetI(int i, int key)
+        {
+            CheckIndex(i);
+            Lua_rawgeti(State, i, key);
+        }
         public override void SetTable(int i)
         {
             CheckIndex(i);
@@ -425,6 +436,13 @@ namespace S5xTool
             if (Top < 2)
                 throw new LuaError("no key/value on stack");
             Lua_rawset(State, i);
+        }
+        public override void RawSetI(int i, int key)
+        {
+            CheckIndex(i);
+            if (Top < 1)
+                throw new LuaError("no value on stack");
+            Lua_rawseti(State, i, key);
         }
         public override IEnumerable<LuaType> Pairs(int i) // iterate over table, key is at -2, value at -1, enumerable is type of value, only access them, dont change them
         {
@@ -518,112 +536,6 @@ namespace S5xTool
             GC.KeepAlive(wr);
             w.Flush();
             return s.ToArray();
-        }
-
-        // object as udata
-
-        private readonly Dictionary<Type, int> TypeMetatables = new Dictionary<Type, int>();
-        private readonly Dictionary<Int32, object> UserdataObjects = new Dictionary<Int32, object>();
-        private Int32 NextKey = 0;
-        /// <summary>
-        /// registers a type in this lua state to use as userdata.
-        /// annotate methods with LuaUserdataFunction to make them accesible in lua.
-        /// method signature should be public int Func(LuaState50 l).
-        /// first paramether from lua (this/self) gets removed automatically.
-        /// 
-        /// this is the expensive part of pushing an object, but it is only needed once.
-        /// you can call this method way in advance of actually pushing the objects.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        public override void RegisterType<T>() {
-            if (TypeMetatables.ContainsKey(typeof(T)))
-                return;
-            string n = typeof(T).FullName;
-            int t = Top;
-
-            NewTable();
-            Push("TypeName");
-            Push(n);
-            SetTable(-3);
-            Push("__index");
-            NewTable();
-
-            foreach (MethodInfo m in typeof(T).GetMethods())
-            {
-                LuaUserdataFunction f = m.GetCustomAttribute<LuaUserdataFunction>();
-                if (f != null)
-                {
-                    Func<T, LuaState, int> del = (Func<T, LuaState, int>)Delegate.CreateDelegate(typeof(Func<T, LuaState, int>), m);
-                    Func<LuaState, int> d2 = (LuaState s) =>
-                    {
-                        T o = GetObject<T>(1);
-                        s.Remove(1);
-                        return del(o, s);
-                    };
-                    Push(f.Name);
-                    Push(d2);
-                    SetTable(-3);
-                }
-            }
-
-            SetTable(-3);
-
-            Push("__gc");
-            Push((s) =>
-            {
-                Int32 r = Marshal.ReadInt32(Lua_touserdata(State, 1));
-                UserdataObjects.Remove(r);
-                return 0;
-            });
-            SetTable(-3);
-
-            TypeMetatables[typeof(T)] = Ref();
-
-            Top = t;
-        }
-        /// <summary>
-        /// pushes a c# object to acces it from lua. object keeps being referenced until lua gcs it.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="ob"></param>
-        /// <see cref="RegisterType{T}">for info on how to add methods to it</see>
-        public override void PushObject<T>(T ob)
-        {
-            CheckStack(2);
-            if (ob == null)
-                throw new NullReferenceException();
-            if (!TypeMetatables.ContainsKey(typeof(T)))
-                RegisterType<T>();
-            int r = TypeMetatables[typeof(T)];
-            UserdataObjects[NextKey] = ob;
-            IntPtr ud = Lua_newuserdata(State, sizeof(Int32));
-            Marshal.WriteInt32(ud, NextKey);
-            Lua_rawgeti(State, REGISTRYINDEX, r);
-            SetMetatable(-2);
-
-            NextKey++;
-        }
-        public override T GetObject<T>(int i)
-        {
-            CheckIndex(i);
-            CheckType(i, LuaType.UserData);
-            int t = Top;
-            try
-            {
-                if (!GetMetatable(i))
-                    throw new LuaError("udata has no metatable");
-                Push("TypeName");
-                GetTable(-2);
-                Push(typeof(T).FullName);
-                if (!Equal(-1, -2))
-                    throw new LuaError("udata type does not match");
-                Pop(3);
-                return (T)UserdataObjects[Marshal.ReadInt32(Lua_touserdata(State, i))];
-            }
-            finally
-            {
-                Top = t;
-            }
         }
     }
 }

@@ -162,5 +162,11 @@ namespace S5xTool
             }
             return 1;
         }
+        [LuaUserdataFunction("Clear")]
+        public int Clear(LuaState l)
+        {
+            A.Clear();
+            return 0;
+        }
     }
 }

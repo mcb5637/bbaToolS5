@@ -523,18 +523,18 @@ namespace S5xTool
 
         private void AddLuaFuncs()
         {
-            L.RegisterType<ArchiveAccess>();
+            L.RegisterTypeForUserdata<ArchiveAccess>();
             L.Push("NewArchive");
             L.Push((s) =>
             {
-                s.PushObject(new ArchiveAccess());
+                s.PushObjectAsUserdata(new ArchiveAccess());
                 return 1;
             });
             L.SetTable(L.GLOBALSINDEX);
             L.Push("SetArchiveForUI");
             L.Push((s) =>
             {
-                BbaArchive a = s.GetObject<ArchiveAccess>(1).A;
+                BbaArchive a = s.FromUserdata<ArchiveAccess>(1).A;
                 if (a != Archive)
                 {
                     Archive.Clear(); // speed up GC
@@ -547,7 +547,7 @@ namespace S5xTool
             L.Push("GetArchiveForUI");
             L.Push((s) =>
             {
-                s.PushObject(Archive);
+                s.PushObjectAsUserdata(new ArchiveAccess(Archive));
                 return 1;
             });
             L.SetTable(L.GLOBALSINDEX);
@@ -561,7 +561,7 @@ namespace S5xTool
             L.Push("MapFileSetGUID");
             L.Push((s) =>
             {
-                BbaArchive a = s.GetObject<ArchiveAccess>(1).A;
+                BbaArchive a = s.FromUserdata<ArchiveAccess>(1).A;
                 if (!SetGUID(a, s.ToString(2)))
                     throw new LuaError("no info.xml found");
                 return 0;
@@ -570,7 +570,7 @@ namespace S5xTool
             L.Push("MapFileGetNameAndText");
             L.Push((s) =>
             {
-                BbaArchive a = s.GetObject<ArchiveAccess>(1).A;
+                BbaArchive a = s.FromUserdata<ArchiveAccess>(1).A;
                 string n, t;
                 t = GetNameAndText(a, out n);
                 if (n != null)
@@ -589,7 +589,7 @@ namespace S5xTool
             L.Push("MapFileSetNameAndText");
             L.Push((s) =>
             {
-                BbaArchive a = s.GetObject<ArchiveAccess>(1).A;
+                BbaArchive a = s.FromUserdata<ArchiveAccess>(1).A;
                 if (!SetNameAndText(a, s.ToString(2), s.ToString(3)))
                     throw new LuaError("no info.xml found");
                 return 0;
@@ -598,8 +598,7 @@ namespace S5xTool
             L.Push("PackLuaScript");
             L.Push((s) =>
             {
-                BbaArchive a = s.GetObject<ArchiveAccess>(1).A;
-                int x = s.Top;
+                BbaArchive a = s.FromUserdata<ArchiveAccess>(1).A;
                 string ofile = s.ToString(2);
                 string ifile = s.ToString(3);
                 string log = "";
@@ -616,7 +615,6 @@ namespace S5xTool
                     isarch.Add(s.ToBoolean(-1));
                     s.Pop(1);
                 }
-                x = s.Top;
                 bool copy = s.ToBoolean(5);
                 bool addloader = s.ToBoolean(6);
                 bool compile = s.ToBoolean(7);
@@ -627,6 +625,21 @@ namespace S5xTool
                 return 1;
             });
             L.SetTable(L.GLOBALSINDEX);
+            if (Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Blue Byte\\The Settlers - Heritage of Kings", "InstallPath", null) is string r)
+            {
+                L.Push("S5InstallPath");
+                L.Push(r);
+                L.SetTable(L.GLOBALSINDEX);
+            }
+            L.Push("ExternalmapPath");
+            L.NewTable();
+            L.Push("Path");
+            L.Push("maps\\externalmap\\");
+            L.SetTable(-3);
+            L.Push("InArchive");
+            L.Push(true);
+            L.SetTable(-3);
+            L.SetTable(L.GLOBALSINDEX);
         }
 
         private void BtnLuaMakro_Click(object sender, EventArgs e)
@@ -636,6 +649,9 @@ namespace S5xTool
             {
                 try
                 {
+                    L.Push("MakroFile");
+                    L.Push(Dlg_Open.FileName);
+                    L.SetTable(L.GLOBALSINDEX);
                     string s = File.ReadAllText(Dlg_Open.FileName);
                     L.LoadBuffer(s, Path.GetFileName(Dlg_Open.FileName));
                     L.PCall(0, 0);
