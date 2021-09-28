@@ -21,13 +21,31 @@ namespace S5xTool
             ERRMEM,
             ERRERR
         }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct LuaDebugRecord
+        {
+            public int debugEvent;
+            public IntPtr name; /* (n) */
+            public IntPtr namewhat; /* (n) `global', `local', `field', `method' */
+            public IntPtr what; /* (S) `Lua', `C', `main', `tail' */
+            public IntPtr source;   /* (S) */
+            public int currentline; /* (l) */
+            public int nups;        /* (u) number of upvalues */
+            public int linedefined; /* (S) */
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 60)]
+            public string short_src; /* (S) */
+
+            /* private part */
+            private int privateInt;  /* active function */
+        }
         public override int REGISTRYINDEX => -10000;
         public override int GLOBALSINDEX => -10001;
         public override int UPVALUEINDEX(int i)
         {
             return GLOBALSINDEX - i;
         }
-        public override int NOREF => -1;
+        public override int NOREF => -2;
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate int LuaCFunc(IntPtr L);
@@ -36,6 +54,7 @@ namespace S5xTool
 
         // state handling
         private readonly IntPtr State;
+        private readonly int PcallStackTraceAttacher_Ref;
         [DllImport("lua50/lua50.dll", EntryPoint = "lua_open", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr Lua_open();
         [DllImport("lua50/lua50.dll", EntryPoint = "lua_close", CallingConvention = CallingConvention.Cdecl)]
@@ -61,6 +80,17 @@ namespace S5xTool
             Luaopen_math(State);
             Luaopen_io(State);
             Luaopen_debug(State);
+            Push(0);
+            Push((s) =>
+            {
+                string st = s.ToString(1);
+                int calldepth = (int)s.ToNumber(UPVALUEINDEX(1));
+                int currdepth = s.GetCurrentFuncStackSize();
+                string trace = s.GetStackTrace(1, currdepth - calldepth);
+                Push(st + "\r\n" + trace);
+                return 1;
+            }, 1);
+            PcallStackTraceAttacher_Ref = Ref();
         }
         private readonly LinkedList<GCHandle> Handles = new LinkedList<GCHandle>();
         ~LuaState50()
@@ -295,7 +325,7 @@ namespace S5xTool
                 }
                 catch (Exception e)
                 {
-                    Push(e.Message);
+                    Push(e.ToString());
                     Lua_error(State);
                     return 0;
                 }
@@ -349,10 +379,7 @@ namespace S5xTool
             {
                 string s = ToString(-1);
                 Pop(1);
-                if (s.StartsWith("lua error:"))
-                    throw new LuaError(s);
-                else
-                    throw new LuaError($"lua error: {r} {s}");
+                throw new LuaError(s);
             }
         }
         public override void LoadBuffer(string buff, string name)
@@ -492,7 +519,19 @@ namespace S5xTool
         {
             if (Top < nargs + 1)
                 throw new LuaError($"pcall not enough vaues on the stack");
-            CheckError(Lua_pcall(State, nargs, nres, 0));
+            int sd = GetCurrentFuncStackSize();
+            RawGetI(REGISTRYINDEX, PcallStackTraceAttacher_Ref);
+            Insert(1);
+            Lua_getupvalue(State, 1, 1);
+            double prevsd = ToNumber(-1);
+            Pop(1);
+            Push(sd);
+            Lua_setupvalue(State, 1, 1);
+            LuaResult r = Lua_pcall(State, nargs, nres, 1);
+            Push(prevsd);
+            Lua_setupvalue(State, 1, 1);
+            Lua_remove(State, 1);
+            CheckError(r);
         }
         public override void Call(int nargs, int nres) // use only inside a luacfunc if you want to forward lua errors
         {
@@ -537,5 +576,50 @@ namespace S5xTool
             w.Flush();
             return s.ToArray();
         }
+
+        // debug
+        [DllImport("lua50/lua50.dll", EntryPoint = "lua_getstack", CallingConvention = CallingConvention.Cdecl)]
+        private static extern int Lua_getstack(IntPtr l, int lvl, IntPtr ar);
+        [DllImport("lua50/lua50.dll", EntryPoint = "lua_getinfo", CallingConvention = CallingConvention.Cdecl)]
+        private static extern int Lua_getinfo(IntPtr l, string what, IntPtr ar);
+        private string GetFuncStackLevel(int lvl)
+        {
+            IntPtr ar = Marshal.AllocHGlobal(Marshal.SizeOf<LuaDebugRecord>());
+            if (Lua_getstack(State, lvl, ar) == 0)
+                return null;
+            if (Lua_getinfo(State, "nSl", ar) == 0)
+                return null;
+            LuaDebugRecord r = Marshal.PtrToStructure<LuaDebugRecord>(ar);
+            return $"{Marshal.PtrToStringAnsi(r.what)} {Marshal.PtrToStringAnsi(r.namewhat)} {(r.name == IntPtr.Zero ? "null" : Marshal.PtrToStringAnsi(r.name))} (defined in: {r.short_src}:{r.currentline})";
+        }
+        public override int GetCurrentFuncStackSize()
+        {
+            int i = 0;
+            IntPtr ar = Marshal.AllocHGlobal(Marshal.SizeOf<LuaDebugRecord>());
+            while (true)
+            {
+                if (Lua_getstack(State, i, ar) == 0)
+                    return i;
+                i++;
+            }
+        }
+        public override string GetStackTrace(int from = 0, int to = -1)
+        {
+            string s = "";
+            int l = from;
+            while (l != to)
+            {
+                string c = GetFuncStackLevel(l);
+                if (c == null)
+                    break;
+                s += c + "\r\n";
+                l++;
+            }
+            return s;
+        }
+        [DllImport("lua50/lua50.dll", EntryPoint = "lua_getupvalue", CallingConvention = CallingConvention.Cdecl)]
+        private static extern IntPtr Lua_getupvalue(IntPtr L, int funcindex, int n);
+        [DllImport("lua50/lua50.dll", EntryPoint = "lua_setupvalue", CallingConvention = CallingConvention.Cdecl)]
+        private static extern IntPtr Lua_setupvalue(IntPtr L, int funcindex, int n);
     }
 }

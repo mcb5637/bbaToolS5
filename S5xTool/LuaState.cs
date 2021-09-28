@@ -205,5 +205,8 @@ namespace S5xTool
                 Top = t;
             }
         }
+
+        public abstract string GetStackTrace(int from = 0, int to = -1);
+        public abstract int GetCurrentFuncStackSize();
     }
 }
