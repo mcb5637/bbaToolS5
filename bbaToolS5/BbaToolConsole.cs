@@ -19,7 +19,7 @@ namespace bbaToolS5
                 if ("-err".Equals(f))
                     errexit = true;
                 else
-                    files.Add(f);
+                    files.Add(f.TrimEnd('\\', '/'));
             }
 
             try
@@ -35,31 +35,33 @@ namespace bbaToolS5
                 }
                 else if (files.Count > 1)
                 {
-                    output = files.Last();
+                    output = Path.GetFullPath(files.Last());
                     files.RemoveAt(files.Count - 1);
                     toArchive = ".s5x".Equals(Path.GetExtension(output)) || ".bba".Equals(Path.GetExtension(output));
                 }
                 else
                 {
-                    if (File.Exists(files[0]))
+                    string p = Path.GetFullPath(files[0]);
+                    if (File.Exists(p))
                     {
-                        output = Path.ChangeExtension(files[0], null);
+                        output = Path.ChangeExtension(p, null);
                         toArchive = false;
                     }
-                    else if (Directory.Exists(files[0]))
+                    else if (Directory.Exists(p))
                     {
-                        output = Path.ChangeExtension(files[0], ".bba");
+                        output = Path.ChangeExtension(p, ".bba");
                         toArchive = true;
                         checkForS5x = true;
                     }
                     else
                     {
-                        throw new IOException($"{files[0]} does not exist");
+                        throw new IOException($"{p} does not exist");
                     }
                 }
                 BbaArchive a = new BbaArchive();
-                foreach (string f in files)
+                foreach (string fi in files)
                 {
+                    string f = Path.GetFullPath(fi);
                     if (File.Exists(f))
                     {
                         Console.WriteLine($"loading archive {f}");
@@ -89,16 +91,21 @@ namespace bbaToolS5
                 }
                 a.Clear();
             }
-            catch (IOException e)
+            catch (Exception e)
             {
+                Console.Write($"Error processing:");
+                foreach (string s in args)
+                    Console.Write("\"" + s + "\" ");
+                Console.WriteLine();
                 Console.WriteLine(e);
                 if (errexit)
                     Environment.Exit(1);
             }
 
+            if (errexit)
+                Environment.Exit(0);
             Console.WriteLine("done. press any key to close this window.");
-            if (!errexit)
-                Console.ReadKey();
+            Console.ReadKey();
         }
 
         private static void ProgressReport(ProgressStatus x)
