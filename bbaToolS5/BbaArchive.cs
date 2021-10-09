@@ -134,7 +134,7 @@ namespace bbaToolS5
             }
         }
 
-        public void ReadFromFolder(string folder, Action<ProgressStatus> prog = null)
+        public void ReadFromFolder(string folder, Action<ProgressStatus> prog = null, bool ignoreHidden=false)
         {
             if (!Directory.Exists(folder))
                 return;
@@ -144,13 +144,15 @@ namespace bbaToolS5
             stat.Step = ProgressStatusStep.ReadFolder_File;
             stat.Progress = 0;
             DirectoryInfo d = new DirectoryInfo(folder);
-            ReadFromFolder(d, "", prog, stat);
+            ReadFromFolder(d, "", prog, stat, ignoreHidden);
         }
 
-        private void ReadFromFolder(DirectoryInfo d, string inter, Action<ProgressStatus> prog, ProgressStatus stat)
+        private void ReadFromFolder(DirectoryInfo d, string inter, Action<ProgressStatus> prog, ProgressStatus stat, bool ignorehidden)
         {
             foreach (FileInfo i in d.GetFiles())
             {
+                if (ignorehidden && (i.Attributes & FileAttributes.Hidden) == FileAttributes.Hidden)
+                    continue;
                 string internalpath = Path.Combine(inter, i.Name);
                 AddFileFromFilesystem(i.FullName, internalpath);
                 stat.AdditionalString = internalpath;
@@ -158,7 +160,9 @@ namespace bbaToolS5
             }
             foreach (DirectoryInfo d2 in d.GetDirectories())
             {
-                ReadFromFolder(d2, Path.Combine(inter, d2.Name), prog, stat);
+                if (ignorehidden && (d2.Attributes & FileAttributes.Hidden) == FileAttributes.Hidden)
+                    continue;
+                ReadFromFolder(d2, Path.Combine(inter, d2.Name), prog, stat, ignorehidden);
             }
         }
 

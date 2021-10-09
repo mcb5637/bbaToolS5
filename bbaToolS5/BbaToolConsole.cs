@@ -12,12 +12,15 @@ namespace bbaToolS5
         internal static void Main(string[] args)
         {
             bool errexit = false;
+            bool ignorehidden = false;
             List<string> files = new List<string>();
 
             foreach (string f in args)
             {
                 if ("-err".Equals(f))
                     errexit = true;
+                else if ("-ignorehidden".Equals(f))
+                    ignorehidden = true;
                 else
                     files.Add(f.TrimEnd('\\', '/'));
             }
@@ -70,7 +73,7 @@ namespace bbaToolS5
                     else if (Directory.Exists(f))
                     {
                         Console.WriteLine($"loading folder {f}");
-                        a.ReadFromFolder(f, ProgressReport);
+                        a.ReadFromFolder(f, ProgressReport, ignorehidden);
                     }
                     else
                     {
