@@ -1,0 +1,3 @@
+[submodule "S5xTool/LuaSharp"]
+	path = S5xTool/LuaSharp
+	url = https://github.com/mcb5637/LuaSharp.git

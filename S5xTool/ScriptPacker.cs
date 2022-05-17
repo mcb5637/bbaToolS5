@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using LuaSharp;
 
 namespace S5xTool
 {
@@ -259,7 +260,7 @@ namespace S5xTool
                     {
                         data = CompileFile(l, data, oufile);
                     }
-                    catch (LuaError e)
+                    catch (LuaException e)
                     {
                         log += $"Error: lua compile: {e.Message}\n";
                     }
@@ -305,7 +306,7 @@ namespace S5xTool
 
         internal static byte[] CompileFile(LuaState L, byte[] data, string name)
         {
-            L.LoadBuffer(data, name);
+            L.LoadBuffer(StringMarshaler.EncodingUsed.GetString(data), name);
             byte[] r = L.Dump();
             L.Pop(1);
             return r;

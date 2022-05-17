@@ -1,4 +1,5 @@
 ﻿using bbaToolS5;
+using LuaSharp;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -73,7 +74,9 @@ namespace S5xTool
                 {
                     using (Stream stream = f.GetStream())
                     {
+#pragma warning disable CA1416 // Validate platform compatibility
                         PicBoxPreviewImg.Image = Image.FromStream(stream);
+#pragma warning restore CA1416 // Validate platform compatibility
                         setPic = true;
                     }
                 }
@@ -402,7 +405,9 @@ namespace S5xTool
         {
             try
             {
+#pragma warning disable CA1416 // Validate platform compatibility
                 string p = Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Blue Byte\\The Settlers - Heritage of Kings", "InstallPath", null) as string;
+#pragma warning restore CA1416 // Validate platform compatibility
                 if (p == null)
                 {
                     MessageBox.Show("registry not set", "error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -514,7 +519,7 @@ namespace S5xTool
                     Archive.AddFileFromMem(nd, f.InternalPath);
                     UpdateList(false, ListBox_Data.SelectedIndex);
                 }
-                catch (LuaError er)
+                catch (LuaException er)
                 {
                     MessageBox.Show(er.Message);
                 }
@@ -523,7 +528,7 @@ namespace S5xTool
 
         private void AddLuaFuncs()
         {
-            L.RegisterTypeForUserdata<ArchiveAccess>();
+            L.PrepareUserDataType<ArchiveAccess>();
             L.Push("NewArchive");
             L.Push((s) =>
             {
@@ -534,7 +539,7 @@ namespace S5xTool
             L.Push("SetArchiveForUI");
             L.Push((s) =>
             {
-                BbaArchive a = s.FromUserdata<ArchiveAccess>(1).A;
+                BbaArchive a = s.CheckUserdata<ArchiveAccess>(1).A;
                 if (a != Archive)
                 {
                     Archive.Clear(); // speed up GC
@@ -561,16 +566,16 @@ namespace S5xTool
             L.Push("MapFileSetGUID");
             L.Push((s) =>
             {
-                BbaArchive a = s.FromUserdata<ArchiveAccess>(1).A;
+                BbaArchive a = s.CheckUserdata<ArchiveAccess>(1).A;
                 if (!SetGUID(a, s.ToString(2)))
-                    throw new LuaError("no info.xml found");
+                    throw new LuaException("no info.xml found");
                 return 0;
             });
             L.SetTable(L.GLOBALSINDEX);
             L.Push("MapFileGetNameAndText");
             L.Push((s) =>
             {
-                BbaArchive a = s.FromUserdata<ArchiveAccess>(1).A;
+                BbaArchive a = s.CheckUserdata<ArchiveAccess>(1).A;
                 string n, t;
                 t = GetNameAndText(a, out n);
                 if (n != null)
@@ -589,16 +594,16 @@ namespace S5xTool
             L.Push("MapFileSetNameAndText");
             L.Push((s) =>
             {
-                BbaArchive a = s.FromUserdata<ArchiveAccess>(1).A;
+                BbaArchive a = s.CheckUserdata<ArchiveAccess>(1).A;
                 if (!SetNameAndText(a, s.ToString(2), s.ToString(3)))
-                    throw new LuaError("no info.xml found");
+                    throw new LuaException("no info.xml found");
                 return 0;
             });
             L.SetTable(L.GLOBALSINDEX);
             L.Push("PackLuaScript");
             L.Push((s) =>
             {
-                BbaArchive a = s.FromUserdata<ArchiveAccess>(1).A;
+                BbaArchive a = s.CheckUserdata<ArchiveAccess>(1).A;
                 string ofile = s.ToString(2);
                 string ifile = s.ToString(3);
                 string log = "";
@@ -607,11 +612,11 @@ namespace S5xTool
                 foreach (int i in s.IPairs(4))
                 {
                     s.Push("Path");
-                    s.RawGet(-2);
+                    s.GetTableRaw(-2);
                     path.Add(s.ToString(-1));
                     s.Pop(1);
                     s.Push("InArchive");
-                    s.RawGet(-2);
+                    s.GetTableRaw(-2);
                     isarch.Add(s.ToBoolean(-1));
                     s.Pop(1);
                 }
@@ -625,12 +630,14 @@ namespace S5xTool
                 return 1;
             });
             L.SetTable(L.GLOBALSINDEX);
+#pragma warning disable CA1416 // Validate platform compatibility
             if (Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Blue Byte\\The Settlers - Heritage of Kings", "InstallPath", null) is string r)
             {
                 L.Push("S5InstallPath");
                 L.Push(r);
                 L.SetTable(L.GLOBALSINDEX);
             }
+#pragma warning restore CA1416 // Validate platform compatibility
             L.Push("ExternalmapPath");
             L.NewTable();
             L.Push("Path");

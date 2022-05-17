@@ -1,4 +1,5 @@
 ﻿using bbaToolS5;
+using LuaSharp;
 using System.IO;
 using System.Text;
 
@@ -8,7 +9,7 @@ namespace S5xTool
     {
         internal readonly BbaArchive A;
 
-        public ArchiveAccess(BbaArchive a=null)
+        public ArchiveAccess(BbaArchive a = null)
         {
             if (a == null)
                 a = new BbaArchive();
@@ -20,11 +21,11 @@ namespace S5xTool
         {
             try
             {
-                A.ReadBba(l.ToString(1));
+                A.ReadBba(l.ToString(2));
             }
             catch (IOException e)
             {
-                throw new LuaError(e.Message);
+                throw new LuaException(e.Message);
             }
             return 0;
         }
@@ -33,11 +34,11 @@ namespace S5xTool
         {
             try
             {
-                A.ReadFromFolder(l.ToString(1));
+                A.ReadFromFolder(l.ToString(2));
             }
             catch (IOException e)
             {
-                throw new LuaError(e.Message);
+                throw new LuaException(e.Message);
             }
             return 0;
         }
@@ -46,11 +47,11 @@ namespace S5xTool
         {
             try
             {
-                A.WriteToBba(l.ToString(1));
+                A.WriteToBba(l.ToString(2));
             }
             catch (IOException e)
             {
-                throw new LuaError(e.Message);
+                throw new LuaException(e.Message);
             }
             return 0;
         }
@@ -59,11 +60,11 @@ namespace S5xTool
         {
             try
             {
-                A.WriteToFolder(l.ToString(1));
+                A.WriteToFolder(l.ToString(2));
             }
             catch (IOException e)
             {
-                throw new LuaError(e.Message);
+                throw new LuaException(e.Message);
             }
             return 0;
         }
@@ -72,11 +73,11 @@ namespace S5xTool
         {
             try
             {
-                A.AddFileFromFilesystem(l.ToString(1), l.ToString(2));
+                A.AddFileFromFilesystem(l.ToString(2), l.ToString(3));
             }
             catch (IOException e)
             {
-                throw new LuaError(e.Message);
+                throw new LuaException(e.Message);
             }
             return 0;
         }
@@ -85,11 +86,11 @@ namespace S5xTool
         {
             try
             {
-                A.AddFileFromMem(Encoding.GetEncoding(1252).GetBytes(l.ToString(1)), l.ToString(2));
+                A.AddFileFromMem(StringMarshaler.EncodingUsed.GetBytes(l.ToString(2)), l.ToString(3));
             }
             catch (IOException e)
             {
-                throw new LuaError(e.Message);
+                throw new LuaException(e.Message);
             }
             return 0;
         }
@@ -98,14 +99,14 @@ namespace S5xTool
         {
             try
             {
-                BbaFile f = A.GetFileByName(l.ToString(1));
+                BbaFile f = A.GetFileByName(l.ToString(2));
                 if (f == null)
-                    throw new LuaError("file doesnt exist in the archive");
-                l.Push(Encoding.GetEncoding(1252).GetString(f.GetBytes()));
+                    throw new LuaException("file doesnt exist in the archive");
+                l.Push(StringMarshaler.EncodingUsed.GetString(f.GetBytes()));
             }
             catch (IOException e)
             {
-                throw new LuaError(e.Message);
+                throw new LuaException(e.Message);
             }
             return 1;
         }
@@ -114,14 +115,14 @@ namespace S5xTool
         {
             try
             {
-                BbaFile f = A.GetFileByName(l.ToString(1));
+                BbaFile f = A.GetFileByName(l.ToString(2));
                 if (f == null)
-                    throw new LuaError("file doesnt exist in the archive");
+                    throw new LuaException("file doesnt exist in the archive");
                 A.RemoveFile(f.InternalPath);
             }
             catch (IOException e)
             {
-                throw new LuaError(e.Message);
+                throw new LuaException(e.Message);
             }
             return 0;
         }
@@ -130,14 +131,14 @@ namespace S5xTool
         {
             try
             {
-                BbaFile f = A.GetFileByName(l.ToString(1));
+                BbaFile f = A.GetFileByName(l.ToString(2));
                 if (f == null)
-                    throw new LuaError("file doesnt exist in the archive");
-                A.RenameFile(f.InternalPath, l.ToString(2));
+                    throw new LuaException("file doesnt exist in the archive");
+                A.RenameFile(f.InternalPath, l.ToString(3));
             }
             catch (IOException e)
             {
-                throw new LuaError(e.Message);
+                throw new LuaException(e.Message);
             }
             return 0;
         }
@@ -152,13 +153,13 @@ namespace S5xTool
                 {
                     l.Push(i);
                     l.Push(f.InternalPath);
-                    l.RawSet(-3);
+                    l.SetTable(-3);
                     i++;
                 }
             }
             catch (IOException e)
             {
-                throw new LuaError(e.Message);
+                throw new LuaException(e.Message);
             }
             return 1;
         }
