@@ -59,6 +59,8 @@ namespace S5xTool
             this.BtnPackScript = new System.Windows.Forms.Button();
             this.BtnCompile = new System.Windows.Forms.Button();
             this.BtnLuaMakro = new System.Windows.Forms.Button();
+            this.Btn_LoadToMem = new System.Windows.Forms.Button();
+            this.CB_Compressed = new System.Windows.Forms.CheckBox();
             LBLMPMode = new System.Windows.Forms.Label();
             LBLKey = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.PicBoxPreviewImg)).BeginInit();
@@ -67,18 +69,20 @@ namespace S5xTool
             // LBLMPMode
             // 
             LBLMPMode.AutoSize = true;
-            LBLMPMode.Location = new System.Drawing.Point(142, 207);
+            LBLMPMode.Location = new System.Drawing.Point(166, 239);
+            LBLMPMode.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             LBLMPMode.Name = "LBLMPMode";
-            LBLMPMode.Size = new System.Drawing.Size(56, 13);
+            LBLMPMode.Size = new System.Drawing.Size(62, 15);
             LBLMPMode.TabIndex = 13;
             LBLMPMode.Text = "MP Mode:";
             // 
             // LBLKey
             // 
             LBLKey.AutoSize = true;
-            LBLKey.Location = new System.Drawing.Point(142, 236);
+            LBLKey.Location = new System.Drawing.Point(166, 272);
+            LBLKey.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             LBLKey.Name = "LBLKey";
-            LBLKey.Size = new System.Drawing.Size(43, 13);
+            LBLKey.Size = new System.Drawing.Size(48, 15);
             LBLKey.TabIndex = 15;
             LBLKey.Text = "AddOn:";
             // 
@@ -89,10 +93,12 @@ namespace S5xTool
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.ListBox_Data.FormattingEnabled = true;
-            this.ListBox_Data.Location = new System.Drawing.Point(498, 12);
-            this.ListBox_Data.MinimumSize = new System.Drawing.Size(714, 563);
+            this.ListBox_Data.ItemHeight = 15;
+            this.ListBox_Data.Location = new System.Drawing.Point(581, 14);
+            this.ListBox_Data.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.ListBox_Data.MinimumSize = new System.Drawing.Size(832, 649);
             this.ListBox_Data.Name = "ListBox_Data";
-            this.ListBox_Data.Size = new System.Drawing.Size(714, 563);
+            this.ListBox_Data.Size = new System.Drawing.Size(832, 649);
             this.ListBox_Data.TabIndex = 0;
             this.ListBox_Data.SelectedIndexChanged += new System.EventHandler(this.ListBox_Data_SelectedIndexChanged);
             this.ListBox_Data.DragDrop += new System.Windows.Forms.DragEventHandler(this.ListBox_Data_DragDrop);
@@ -100,9 +106,10 @@ namespace S5xTool
             // 
             // BtnLoad
             // 
-            this.BtnLoad.Location = new System.Drawing.Point(12, 12);
+            this.BtnLoad.Location = new System.Drawing.Point(14, 14);
+            this.BtnLoad.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.BtnLoad.Name = "BtnLoad";
-            this.BtnLoad.Size = new System.Drawing.Size(126, 23);
+            this.BtnLoad.Size = new System.Drawing.Size(147, 27);
             this.BtnLoad.TabIndex = 1;
             this.BtnLoad.Text = "Load s5x/bba";
             this.BtnLoad.UseVisualStyleBackColor = true;
@@ -110,9 +117,10 @@ namespace S5xTool
             // 
             // BtnSave
             // 
-            this.BtnSave.Location = new System.Drawing.Point(144, 12);
+            this.BtnSave.Location = new System.Drawing.Point(168, 14);
+            this.BtnSave.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.BtnSave.Name = "BtnSave";
-            this.BtnSave.Size = new System.Drawing.Size(134, 23);
+            this.BtnSave.Size = new System.Drawing.Size(156, 27);
             this.BtnSave.TabIndex = 2;
             this.BtnSave.Text = "Save s5x/bba";
             this.BtnSave.UseVisualStyleBackColor = true;
@@ -126,18 +134,20 @@ namespace S5xTool
             // CB_LoadMerge
             // 
             this.CB_LoadMerge.AutoSize = true;
-            this.CB_LoadMerge.Location = new System.Drawing.Point(12, 41);
+            this.CB_LoadMerge.Location = new System.Drawing.Point(14, 47);
+            this.CB_LoadMerge.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.CB_LoadMerge.Name = "CB_LoadMerge";
-            this.CB_LoadMerge.Size = new System.Drawing.Size(126, 17);
+            this.CB_LoadMerge.Size = new System.Drawing.Size(140, 19);
             this.CB_LoadMerge.TabIndex = 3;
             this.CB_LoadMerge.Text = "Load performs Merge";
             this.CB_LoadMerge.UseVisualStyleBackColor = true;
             // 
             // BtnRemove
             // 
-            this.BtnRemove.Location = new System.Drawing.Point(12, 332);
+            this.BtnRemove.Location = new System.Drawing.Point(14, 383);
+            this.BtnRemove.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.BtnRemove.Name = "BtnRemove";
-            this.BtnRemove.Size = new System.Drawing.Size(126, 23);
+            this.BtnRemove.Size = new System.Drawing.Size(147, 27);
             this.BtnRemove.TabIndex = 4;
             this.BtnRemove.Text = "Remove";
             this.BtnRemove.UseVisualStyleBackColor = true;
@@ -145,16 +155,18 @@ namespace S5xTool
             // 
             // TB_Rename
             // 
-            this.TB_Rename.Location = new System.Drawing.Point(144, 305);
+            this.TB_Rename.Location = new System.Drawing.Point(168, 352);
+            this.TB_Rename.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.TB_Rename.Name = "TB_Rename";
-            this.TB_Rename.Size = new System.Drawing.Size(348, 20);
+            this.TB_Rename.Size = new System.Drawing.Size(405, 23);
             this.TB_Rename.TabIndex = 5;
             // 
             // BtnRenameTo
             // 
-            this.BtnRenameTo.Location = new System.Drawing.Point(12, 303);
+            this.BtnRenameTo.Location = new System.Drawing.Point(14, 350);
+            this.BtnRenameTo.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.BtnRenameTo.Name = "BtnRenameTo";
-            this.BtnRenameTo.Size = new System.Drawing.Size(126, 23);
+            this.BtnRenameTo.Size = new System.Drawing.Size(147, 27);
             this.BtnRenameTo.TabIndex = 6;
             this.BtnRenameTo.Text = "Rename To:";
             this.BtnRenameTo.UseVisualStyleBackColor = true;
@@ -163,18 +175,20 @@ namespace S5xTool
             // CB_AskAdd
             // 
             this.CB_AskAdd.AutoSize = true;
-            this.CB_AskAdd.Location = new System.Drawing.Point(12, 64);
+            this.CB_AskAdd.Location = new System.Drawing.Point(14, 74);
+            this.CB_AskAdd.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.CB_AskAdd.Name = "CB_AskAdd";
-            this.CB_AskAdd.Size = new System.Drawing.Size(100, 17);
+            this.CB_AskAdd.Size = new System.Drawing.Size(107, 19);
             this.CB_AskAdd.TabIndex = 7;
             this.CB_AskAdd.Text = "Ask Before Add";
             this.CB_AskAdd.UseVisualStyleBackColor = true;
             // 
             // BtnAddFile
             // 
-            this.BtnAddFile.Location = new System.Drawing.Point(12, 87);
+            this.BtnAddFile.Location = new System.Drawing.Point(14, 100);
+            this.BtnAddFile.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.BtnAddFile.Name = "BtnAddFile";
-            this.BtnAddFile.Size = new System.Drawing.Size(126, 23);
+            this.BtnAddFile.Size = new System.Drawing.Size(147, 27);
             this.BtnAddFile.TabIndex = 8;
             this.BtnAddFile.Text = "Add File";
             this.BtnAddFile.UseVisualStyleBackColor = true;
@@ -182,9 +196,10 @@ namespace S5xTool
             // 
             // BtnExportFile
             // 
-            this.BtnExportFile.Location = new System.Drawing.Point(144, 87);
+            this.BtnExportFile.Location = new System.Drawing.Point(168, 100);
+            this.BtnExportFile.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.BtnExportFile.Name = "BtnExportFile";
-            this.BtnExportFile.Size = new System.Drawing.Size(134, 23);
+            this.BtnExportFile.Size = new System.Drawing.Size(156, 27);
             this.BtnExportFile.TabIndex = 9;
             this.BtnExportFile.Text = "Export File";
             this.BtnExportFile.UseVisualStyleBackColor = true;
@@ -196,9 +211,10 @@ namespace S5xTool
             // 
             // BtnRandomGUID
             // 
-            this.BtnRandomGUID.Location = new System.Drawing.Point(12, 202);
+            this.BtnRandomGUID.Location = new System.Drawing.Point(14, 233);
+            this.BtnRandomGUID.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.BtnRandomGUID.Name = "BtnRandomGUID";
-            this.BtnRandomGUID.Size = new System.Drawing.Size(126, 23);
+            this.BtnRandomGUID.Size = new System.Drawing.Size(147, 27);
             this.BtnRandomGUID.TabIndex = 10;
             this.BtnRandomGUID.Text = "Randomize GUID";
             this.BtnRandomGUID.UseVisualStyleBackColor = true;
@@ -209,9 +225,10 @@ namespace S5xTool
             this.CBRandomGUID.AutoSize = true;
             this.CBRandomGUID.Checked = true;
             this.CBRandomGUID.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.CBRandomGUID.Location = new System.Drawing.Point(144, 41);
+            this.CBRandomGUID.Location = new System.Drawing.Point(168, 47);
+            this.CBRandomGUID.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.CBRandomGUID.Name = "CBRandomGUID";
-            this.CBRandomGUID.Size = new System.Drawing.Size(109, 17);
+            this.CBRandomGUID.Size = new System.Drawing.Size(115, 19);
             this.CBRandomGUID.TabIndex = 11;
             this.CBRandomGUID.Text = "Randomize GUID";
             this.CBRandomGUID.UseVisualStyleBackColor = true;
@@ -238,9 +255,10 @@ namespace S5xTool
             "MP max 14",
             "MP max 15",
             "MP max 16"});
-            this.ComboBox_MPType.Location = new System.Drawing.Point(204, 204);
+            this.ComboBox_MPType.Location = new System.Drawing.Point(238, 235);
+            this.ComboBox_MPType.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.ComboBox_MPType.Name = "ComboBox_MPType";
-            this.ComboBox_MPType.Size = new System.Drawing.Size(134, 21);
+            this.ComboBox_MPType.Size = new System.Drawing.Size(156, 23);
             this.ComboBox_MPType.TabIndex = 12;
             this.ComboBox_MPType.SelectedIndexChanged += new System.EventHandler(this.ComboBox_MPType_SelectedIndexChanged);
             // 
@@ -252,17 +270,19 @@ namespace S5xTool
             "Base",
             "Extra 1",
             "Extra 2"});
-            this.ComboBox_Key.Location = new System.Drawing.Point(204, 233);
+            this.ComboBox_Key.Location = new System.Drawing.Point(238, 269);
+            this.ComboBox_Key.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.ComboBox_Key.Name = "ComboBox_Key";
-            this.ComboBox_Key.Size = new System.Drawing.Size(134, 21);
+            this.ComboBox_Key.Size = new System.Drawing.Size(156, 23);
             this.ComboBox_Key.TabIndex = 14;
             this.ComboBox_Key.SelectedIndexChanged += new System.EventHandler(this.ComboBox_Key_SelectedIndexChanged);
             // 
             // BtnPeek
             // 
-            this.BtnPeek.Location = new System.Drawing.Point(144, 332);
+            this.BtnPeek.Location = new System.Drawing.Point(168, 383);
+            this.BtnPeek.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.BtnPeek.Name = "BtnPeek";
-            this.BtnPeek.Size = new System.Drawing.Size(134, 23);
+            this.BtnPeek.Size = new System.Drawing.Size(156, 27);
             this.BtnPeek.TabIndex = 16;
             this.BtnPeek.Text = "Peek At";
             this.BtnPeek.UseVisualStyleBackColor = true;
@@ -270,9 +290,10 @@ namespace S5xTool
             // 
             // BtnReplaceImage
             // 
-            this.BtnReplaceImage.Location = new System.Drawing.Point(12, 231);
+            this.BtnReplaceImage.Location = new System.Drawing.Point(14, 267);
+            this.BtnReplaceImage.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.BtnReplaceImage.Name = "BtnReplaceImage";
-            this.BtnReplaceImage.Size = new System.Drawing.Size(126, 23);
+            this.BtnReplaceImage.Size = new System.Drawing.Size(147, 27);
             this.BtnReplaceImage.TabIndex = 17;
             this.BtnReplaceImage.Text = "Replace Map Image";
             this.BtnReplaceImage.UseVisualStyleBackColor = true;
@@ -280,9 +301,10 @@ namespace S5xTool
             // 
             // BtnLoadEx2Bbas
             // 
-            this.BtnLoadEx2Bbas.Location = new System.Drawing.Point(284, 12);
+            this.BtnLoadEx2Bbas.Location = new System.Drawing.Point(331, 14);
+            this.BtnLoadEx2Bbas.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.BtnLoadEx2Bbas.Name = "BtnLoadEx2Bbas";
-            this.BtnLoadEx2Bbas.Size = new System.Drawing.Size(133, 23);
+            this.BtnLoadEx2Bbas.Size = new System.Drawing.Size(155, 27);
             this.BtnLoadEx2Bbas.TabIndex = 18;
             this.BtnLoadEx2Bbas.Text = "Load Extra2 Bbas";
             this.BtnLoadEx2Bbas.UseVisualStyleBackColor = true;
@@ -290,9 +312,10 @@ namespace S5xTool
             // 
             // BtnSort
             // 
-            this.BtnSort.Location = new System.Drawing.Point(284, 87);
+            this.BtnSort.Location = new System.Drawing.Point(331, 100);
+            this.BtnSort.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.BtnSort.Name = "BtnSort";
-            this.BtnSort.Size = new System.Drawing.Size(133, 23);
+            this.BtnSort.Size = new System.Drawing.Size(155, 27);
             this.BtnSort.TabIndex = 19;
             this.BtnSort.Text = "Sort by Name";
             this.BtnSort.UseVisualStyleBackColor = true;
@@ -300,9 +323,10 @@ namespace S5xTool
             // 
             // BtnLoadFolder
             // 
-            this.BtnLoadFolder.Location = new System.Drawing.Point(12, 116);
+            this.BtnLoadFolder.Location = new System.Drawing.Point(14, 134);
+            this.BtnLoadFolder.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.BtnLoadFolder.Name = "BtnLoadFolder";
-            this.BtnLoadFolder.Size = new System.Drawing.Size(126, 23);
+            this.BtnLoadFolder.Size = new System.Drawing.Size(147, 27);
             this.BtnLoadFolder.TabIndex = 20;
             this.BtnLoadFolder.Text = "Load Folder";
             this.BtnLoadFolder.UseVisualStyleBackColor = true;
@@ -310,9 +334,10 @@ namespace S5xTool
             // 
             // BtnSaveFolder
             // 
-            this.BtnSaveFolder.Location = new System.Drawing.Point(144, 116);
+            this.BtnSaveFolder.Location = new System.Drawing.Point(168, 134);
+            this.BtnSaveFolder.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.BtnSaveFolder.Name = "BtnSaveFolder";
-            this.BtnSaveFolder.Size = new System.Drawing.Size(134, 23);
+            this.BtnSaveFolder.Size = new System.Drawing.Size(156, 27);
             this.BtnSaveFolder.TabIndex = 21;
             this.BtnSaveFolder.Text = "Export as Folder";
             this.BtnSaveFolder.UseVisualStyleBackColor = true;
@@ -320,9 +345,10 @@ namespace S5xTool
             // 
             // BtnImportFolderMap
             // 
-            this.BtnImportFolderMap.Location = new System.Drawing.Point(12, 145);
+            this.BtnImportFolderMap.Location = new System.Drawing.Point(14, 167);
+            this.BtnImportFolderMap.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.BtnImportFolderMap.Name = "BtnImportFolderMap";
-            this.BtnImportFolderMap.Size = new System.Drawing.Size(126, 23);
+            this.BtnImportFolderMap.Size = new System.Drawing.Size(147, 27);
             this.BtnImportFolderMap.TabIndex = 22;
             this.BtnImportFolderMap.Text = "Import Folder Map";
             this.BtnImportFolderMap.UseVisualStyleBackColor = true;
@@ -330,17 +356,19 @@ namespace S5xTool
             // 
             // PicBoxPreviewImg
             // 
-            this.PicBoxPreviewImg.Location = new System.Drawing.Point(12, 361);
+            this.PicBoxPreviewImg.Location = new System.Drawing.Point(14, 417);
+            this.PicBoxPreviewImg.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.PicBoxPreviewImg.Name = "PicBoxPreviewImg";
-            this.PicBoxPreviewImg.Size = new System.Drawing.Size(190, 175);
+            this.PicBoxPreviewImg.Size = new System.Drawing.Size(222, 202);
             this.PicBoxPreviewImg.TabIndex = 23;
             this.PicBoxPreviewImg.TabStop = false;
             // 
             // BtnPackScript
             // 
-            this.BtnPackScript.Location = new System.Drawing.Point(284, 332);
+            this.BtnPackScript.Location = new System.Drawing.Point(331, 383);
+            this.BtnPackScript.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.BtnPackScript.Name = "BtnPackScript";
-            this.BtnPackScript.Size = new System.Drawing.Size(107, 23);
+            this.BtnPackScript.Size = new System.Drawing.Size(125, 27);
             this.BtnPackScript.TabIndex = 24;
             this.BtnPackScript.Text = "PackScript";
             this.BtnPackScript.UseVisualStyleBackColor = true;
@@ -348,9 +376,10 @@ namespace S5xTool
             // 
             // BtnCompile
             // 
-            this.BtnCompile.Location = new System.Drawing.Point(397, 332);
+            this.BtnCompile.Location = new System.Drawing.Point(463, 383);
+            this.BtnCompile.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.BtnCompile.Name = "BtnCompile";
-            this.BtnCompile.Size = new System.Drawing.Size(95, 23);
+            this.BtnCompile.Size = new System.Drawing.Size(111, 27);
             this.BtnCompile.TabIndex = 25;
             this.BtnCompile.Text = "Compile";
             this.BtnCompile.UseVisualStyleBackColor = true;
@@ -358,20 +387,44 @@ namespace S5xTool
             // 
             // BtnLuaMakro
             // 
-            this.BtnLuaMakro.Location = new System.Drawing.Point(284, 552);
+            this.BtnLuaMakro.Location = new System.Drawing.Point(331, 637);
+            this.BtnLuaMakro.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.BtnLuaMakro.Name = "BtnLuaMakro";
-            this.BtnLuaMakro.Size = new System.Drawing.Size(208, 23);
+            this.BtnLuaMakro.Size = new System.Drawing.Size(243, 27);
             this.BtnLuaMakro.TabIndex = 26;
             this.BtnLuaMakro.Text = "Execute Lua Makro";
             this.BtnLuaMakro.UseVisualStyleBackColor = true;
             this.BtnLuaMakro.Click += new System.EventHandler(this.BtnLuaMakro_Click);
             // 
+            // Btn_LoadToMem
+            // 
+            this.Btn_LoadToMem.Location = new System.Drawing.Point(331, 138);
+            this.Btn_LoadToMem.Name = "Btn_LoadToMem";
+            this.Btn_LoadToMem.Size = new System.Drawing.Size(155, 23);
+            this.Btn_LoadToMem.TabIndex = 27;
+            this.Btn_LoadToMem.Text = "Load To Memory";
+            this.Btn_LoadToMem.UseVisualStyleBackColor = true;
+            this.Btn_LoadToMem.Click += new System.EventHandler(this.Btn_LoadToMem_Click);
+            // 
+            // CB_Compressed
+            // 
+            this.CB_Compressed.AutoSize = true;
+            this.CB_Compressed.Location = new System.Drawing.Point(463, 417);
+            this.CB_Compressed.Name = "CB_Compressed";
+            this.CB_Compressed.Size = new System.Drawing.Size(92, 19);
+            this.CB_Compressed.TabIndex = 28;
+            this.CB_Compressed.Text = "Compressed";
+            this.CB_Compressed.UseVisualStyleBackColor = true;
+            this.CB_Compressed.CheckedChanged += new System.EventHandler(this.CB_Compressed_CheckedChanged);
+            // 
             // S5xToolGUI
             // 
             this.AcceptButton = this.BtnRenameTo;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1224, 592);
+            this.ClientSize = new System.Drawing.Size(1428, 683);
+            this.Controls.Add(this.CB_Compressed);
+            this.Controls.Add(this.Btn_LoadToMem);
             this.Controls.Add(this.BtnLuaMakro);
             this.Controls.Add(this.BtnCompile);
             this.Controls.Add(this.BtnPackScript);
@@ -399,6 +452,7 @@ namespace S5xTool
             this.Controls.Add(this.BtnSave);
             this.Controls.Add(this.BtnLoad);
             this.Controls.Add(this.ListBox_Data);
+            this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Name = "S5xToolGUI";
             this.Text = "S5xTool";
             ((System.ComponentModel.ISupportInitialize)(this.PicBoxPreviewImg)).EndInit();
@@ -437,6 +491,8 @@ namespace S5xTool
         private System.Windows.Forms.Button BtnPackScript;
         private System.Windows.Forms.Button BtnCompile;
         private System.Windows.Forms.Button BtnLuaMakro;
+        private System.Windows.Forms.Button Btn_LoadToMem;
+        private System.Windows.Forms.CheckBox CB_Compressed;
     }
 }
 

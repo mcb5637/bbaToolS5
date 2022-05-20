@@ -142,11 +142,15 @@ namespace S5xTool
             {
                 TB_Rename.Text = f.InternalPath;
                 enable = true;
+                CB_Compressed.Enabled = true;
+                CB_Compressed.Checked = f.ShouldCompess;
             }
             else
             {
                 TB_Rename.Text = "";
                 enable = false;
+                CB_Compressed.Enabled = false;
+                CB_Compressed.Checked = false;
             }
             bool hasInfo = Archive.GetFileByName(InfoXML) != null;
             BtnRenameTo.Enabled = enable;
@@ -668,6 +672,20 @@ namespace S5xTool
                     MessageBox.Show(ex.ToString());
                 }
             }
+        }
+
+        private void Btn_LoadToMem_Click(object sender, EventArgs e)
+        {
+            Archive.LoadToMemory();
+            UpdateList(false, ListBox_Data.SelectedIndex);
+        }
+
+        private void CB_Compressed_CheckedChanged(object sender, EventArgs e)
+        {
+            if (Updating)
+                return;
+            if (ListBox_Data.SelectedItem is BbaFile f)
+                f.ShouldCompess = CB_Compressed.Checked;
         }
     }
 }

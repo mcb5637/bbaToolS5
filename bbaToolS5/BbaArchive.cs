@@ -33,7 +33,7 @@ namespace bbaToolS5
         {
             AddFile(new BbaFileFromFilesystem()
             {
-                InternalPath = internalpath.ToLower(),
+                InternalPath = FixPath(internalpath),
                 SourceFilePath = path
             });
         }
@@ -60,17 +60,18 @@ namespace bbaToolS5
         public void CopyFile(BbaFile f, string intName)
         {
             BbaFile copy = f.Clone();
-            copy.InternalPath = intName.ToLower();
+            copy.InternalPath = FixPath(intName);
             AddFile(copy);
         }
 
         public bool RenameFile(string currName, string newName)
         {
+            newName = FixPath(newName);
             RemoveFile(newName);
             int i = Contents.FindIndex((x) => x.InternalPath.Equals(currName));
             if (i >= 0)
             {
-                Contents[i].InternalPath = FixPath(newName);
+                Contents[i].InternalPath = newName;
                 return true;
             }
             return false;
@@ -81,7 +82,7 @@ namespace bbaToolS5
             Contents.Sort();
         }
 
-        private string FixPath(string path)
+        private static string FixPath(string path)
         {
             return path.ToLower().Replace("/", "\\");
         }
@@ -89,6 +90,15 @@ namespace bbaToolS5
         public BbaFile GetFileByName(string name)
         {
             return Contents.FirstOrDefault((x) => x.InternalPath.Equals(name));
+        }
+
+        public void LoadToMemory()
+        {
+            BbaFile f = Contents.FirstOrDefault((fi) => fi is not BbaFileFromMem);
+            while (f != null) {
+                AddFileFromMem(f.GetBytes(), f.InternalPath);
+                f = Contents.FirstOrDefault((fi) => fi is not BbaFileFromMem);
+            }
         }
 
         public void WriteToBba(string file, Action<ProgressStatus> prog = null)
