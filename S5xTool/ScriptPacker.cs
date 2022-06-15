@@ -306,7 +306,25 @@ namespace S5xTool
 
         internal static byte[] CompileFile(LuaState L, byte[] data, string name)
         {
-            L.LoadBuffer(StringMarshaler.EncodingUsed.GetString(data), name);
+            try
+            {
+                L.LoadBuffer(data, name);
+            }
+            catch (LuaException e)
+            {
+                bool done = false;
+                if (data.Length > 0 && data[^1] == 0)
+                {
+                    try
+                    {
+                        L.LoadBuffer(data.SkipLast(1).ToArray(), name);
+                        done = true;
+                    }
+                    catch (LuaException) { }
+                }
+                if (!done)
+                    throw e;
+            }
             byte[] r = L.Dump();
             L.Pop(1);
             return r;
