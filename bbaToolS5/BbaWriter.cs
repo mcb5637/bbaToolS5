@@ -10,26 +10,23 @@ namespace bbaToolS5
 {
     public class BbaWriter
     {
-        public static void WriteBba(BbaArchive a, string file, Action<ProgressStatus> prog = null)
+        public static void WriteBba(BbaArchive a, string file, Action<ProgressStatus> prog = null, bool autoCompression = false)
         {
-            using (FileStream w = new FileStream(file, FileMode.Create, FileAccess.Write))
-            {
-                WriteBba(a, w, prog);
-            }
+            using FileStream w = new(file, FileMode.Create, FileAccess.Write);
+            WriteBba(a, w, prog, autoCompression);
         }
 
-        public static void WriteBba(BbaArchive a, Stream w, Action<ProgressStatus> prog = null)
+        public static void WriteBba(BbaArchive a, Stream w, Action<ProgressStatus> prog = null, bool autoCompression = false)
         {
             if (prog == null)
                 prog = (X) => { };
-            ProgressStatus stat = new ProgressStatus
+            ProgressStatus stat = new()
             {
                 Step = ProgressStatusStep.WriteBba_Files,
                 Progress = 0
             };
 
             BinaryWriter wr = new BinaryWriter(w);
-            BbaDirStructEntry root = BuildStructure(a, out int Count);
             long startpos = w.Position;
             // skip header, written later
             w.Seek(BbaHeader.Size, SeekOrigin.Current);
@@ -40,35 +37,66 @@ namespace bbaToolS5
             // write files
             foreach (BbaFile f in a)
             {
-                f.PosWrittenTo = w.Position;
-                if (f.ShouldCompess)
+                if (f is not BbaFileLink)
                 {
-                    byte[] file = f.GetBytes();
-                    BbaCompresedFileHeader compfile = new BbaCompresedFileHeader();
-                    compfile.UncompressedSize = (uint)file.Length;
-                    file = ZipTools.CompressBuffer(file);
-                    compfile.Adler32 = Adler.Adler32(29061971, file, 0, file.Length);
-                    compfile.CompressedSize = (uint)file.Length;
-                    compfile.DataLength = compfile.CompressedSize + 12;
-                    compfile.Write(wr);
-                    wr.Write(file);
-                    f.WrittenSize = compfile.UncompressedSize;
+                    f.PosWrittenTo = w.Position;
+                    if (autoCompression)
+                    {
+                        byte[] file = f.GetBytes();
+                        byte[] compressed = ZipTools.CompressBuffer(file);
+                        int cmplen = compressed.Length + 5 * 4;
+                        if (cmplen < file.Length)
+                        {
+                            BbaCompresedFileHeader compfile = new();
+                            compfile.Adler32 = Adler.Adler32(29061971, compressed, 0, compressed.Length);
+                            compfile.CompressedSize = (uint)compressed.Length;
+                            compfile.DataLength = compfile.CompressedSize + 12;
+                            compfile.Write(wr);
+                            wr.Write(compressed);
+                            f.WrittenSize = compfile.UncompressedSize;
+                            f.ShouldCompess = true;
+                        }
+                        else
+                        {
+                            wr.Write(file);
+                            f.WrittenSize = (uint)(w.Position - f.PosWrittenTo);
+                            f.ShouldCompess = false;
+                        }
+                    }
+                    else if (f.ShouldCompess)
+                    {
+                        byte[] file = f.GetBytes();
+                        BbaCompresedFileHeader compfile = new();
+                        compfile.UncompressedSize = (uint)file.Length;
+                        file = ZipTools.CompressBuffer(file);
+                        compfile.Adler32 = Adler.Adler32(29061971, file, 0, file.Length);
+                        compfile.CompressedSize = (uint)file.Length;
+                        compfile.DataLength = compfile.CompressedSize + 12;
+                        compfile.Write(wr);
+                        wr.Write(file);
+                        f.WrittenSize = compfile.UncompressedSize;
+                    }
+                    else
+                    {
+                        using (Stream s = f.GetStream())
+                        {
+                            s.CopyTo(w);
+                        }
+                        f.WrittenSize = (uint)(w.Position - f.PosWrittenTo);
+                    }
+                    stat.AdditionalString = f.InternalPath;
                 }
                 else
                 {
-                    using (Stream s = f.GetStream())
-                    {
-                        s.CopyTo(w);
-                    }
-                    f.WrittenSize = (uint)(w.Position - f.PosWrittenTo);
+                    stat.AdditionalString = f.InternalPath + " link skipped";
                 }
                 currFile++;
                 stat.Progress = 100 * currFile / numFiles;
-                stat.AdditionalString = f.InternalPath;
                 prog(stat);
             }
             filesize += (int)w.Position;
 
+            BbaDirStructEntry root = BuildStructure(a, out int Count);
             stat.Step = ProgressStatusStep.WriteBba_Directory;
             stat.Progress = 0;
             // write directories

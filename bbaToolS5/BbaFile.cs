@@ -17,9 +17,9 @@ namespace bbaToolS5
             internal set;
         }
 
-        internal long PosWrittenTo;
-        internal uint WrittenSize;
-        public bool ShouldCompess;
+        internal virtual long PosWrittenTo { get; set; }
+        internal virtual uint WrittenSize { get; set; }
+        public virtual bool ShouldCompess { get; set; }
 
         public abstract Stream GetStream();
         public abstract byte[] GetBytes();

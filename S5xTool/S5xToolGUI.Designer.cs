@@ -61,6 +61,8 @@ namespace S5xTool
             this.BtnLuaMakro = new System.Windows.Forms.Button();
             this.Btn_LoadToMem = new System.Windows.Forms.Button();
             this.CB_Compressed = new System.Windows.Forms.CheckBox();
+            this.BtnSearchDuplicates = new System.Windows.Forms.Button();
+            this.CB_AutoCompression = new System.Windows.Forms.CheckBox();
             LBLMPMode = new System.Windows.Forms.Label();
             LBLKey = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.PicBoxPreviewImg)).BeginInit();
@@ -398,9 +400,9 @@ namespace S5xTool
             // 
             // Btn_LoadToMem
             // 
-            this.Btn_LoadToMem.Location = new System.Drawing.Point(331, 138);
+            this.Btn_LoadToMem.Location = new System.Drawing.Point(331, 134);
             this.Btn_LoadToMem.Name = "Btn_LoadToMem";
-            this.Btn_LoadToMem.Size = new System.Drawing.Size(155, 23);
+            this.Btn_LoadToMem.Size = new System.Drawing.Size(155, 27);
             this.Btn_LoadToMem.TabIndex = 27;
             this.Btn_LoadToMem.Text = "Load To Memory";
             this.Btn_LoadToMem.UseVisualStyleBackColor = true;
@@ -417,12 +419,34 @@ namespace S5xTool
             this.CB_Compressed.UseVisualStyleBackColor = true;
             this.CB_Compressed.CheckedChanged += new System.EventHandler(this.CB_Compressed_CheckedChanged);
             // 
+            // BtnSearchDuplicates
+            // 
+            this.BtnSearchDuplicates.Location = new System.Drawing.Point(168, 167);
+            this.BtnSearchDuplicates.Name = "BtnSearchDuplicates";
+            this.BtnSearchDuplicates.Size = new System.Drawing.Size(156, 27);
+            this.BtnSearchDuplicates.TabIndex = 29;
+            this.BtnSearchDuplicates.Text = "Search Duplicates";
+            this.BtnSearchDuplicates.UseVisualStyleBackColor = true;
+            this.BtnSearchDuplicates.Click += new System.EventHandler(this.BtnSearchDuplicates_Click);
+            // 
+            // CB_AutoCompression
+            // 
+            this.CB_AutoCompression.AutoSize = true;
+            this.CB_AutoCompression.Location = new System.Drawing.Point(331, 172);
+            this.CB_AutoCompression.Name = "CB_AutoCompression";
+            this.CB_AutoCompression.Size = new System.Drawing.Size(125, 19);
+            this.CB_AutoCompression.TabIndex = 30;
+            this.CB_AutoCompression.Text = "Auto Compression";
+            this.CB_AutoCompression.UseVisualStyleBackColor = true;
+            // 
             // S5xToolGUI
             // 
             this.AcceptButton = this.BtnRenameTo;
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1428, 683);
+            this.Controls.Add(this.CB_AutoCompression);
+            this.Controls.Add(this.BtnSearchDuplicates);
             this.Controls.Add(this.CB_Compressed);
             this.Controls.Add(this.Btn_LoadToMem);
             this.Controls.Add(this.BtnLuaMakro);
@@ -493,6 +517,8 @@ namespace S5xTool
         private System.Windows.Forms.Button BtnLuaMakro;
         private System.Windows.Forms.Button Btn_LoadToMem;
         private System.Windows.Forms.CheckBox CB_Compressed;
+        private System.Windows.Forms.Button BtnSearchDuplicates;
+        private System.Windows.Forms.CheckBox CB_AutoCompression;
     }
 }
 

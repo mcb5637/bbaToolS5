@@ -118,16 +118,24 @@ namespace bbaToolS5
             {
                 if (shouldAdd(e.Filename))
                 {
-                    ar.AddFile(new BbaFileFromArchive()
+                    BbaFile linked = ar.Contents.Find((f) => f is BbaFileFromArchive fa && fa.FileOffset == e.Offset);
+                    if (linked != null)
                     {
-                        InternalPath = e.Filename,
-                        SourceFilePath = file,
-                        FileOffset = e.Offset,
-                        FileLength = e.Size,
-                        IsCompressed = e.Type == BbaOutputType.Compressed,
-                        SourceInternalPath = e.Filename,
-                        ReadFrom = inp
-                    });
+                        ar.AddFileLink(e.Filename, linked);
+                    }
+                    else
+                    {
+                        ar.AddFile(new BbaFileFromArchive()
+                        {
+                            InternalPath = e.Filename,
+                            SourceFilePath = file,
+                            FileOffset = e.Offset,
+                            FileLength = e.Size,
+                            IsCompressed = e.Type == BbaOutputType.Compressed,
+                            SourceInternalPath = e.Filename,
+                            ReadFrom = inp
+                        });
+                    }
                     status.AdditionalString = e.Filename;
                     status.Progress = processed * 100 / numFiles;
                     prog(status);

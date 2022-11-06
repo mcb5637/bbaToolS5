@@ -47,6 +47,45 @@ namespace bbaToolS5
             });
         }
 
+        public void AddFileLink(string path, BbaFile to)
+        {
+            if (to == null)
+                throw new ArgumentNullException(nameof(to));
+            if (!Contents.Contains(to))
+                throw new ArgumentException("to has to be in the archive");
+            AddFile(new BbaFileLink()
+            {
+                InternalPath = FixPath(path),
+                Linked = to,
+            });
+        }
+
+        public void AddFileLink(string path, string original)
+        {
+            AddFileLink(path, GetFileByName(original));
+        }
+
+        public void SearchAndLinkDuplicates()
+        {
+            Dictionary<BbaFile, BbaFile> duplicates = new();
+            for (int i = 0; i < Contents.Count; i++)
+            {
+                if (Contents[i] is BbaFileLink || duplicates.ContainsKey(Contents[i]))
+                    continue;
+                for (int j = i+1; j < Contents.Count; j++)
+                {
+                    if (Contents[j] is BbaFileLink || duplicates.ContainsKey(Contents[j]))
+                        continue;
+                    if (Contents[i].GetBytes().SequenceEqual(Contents[j].GetBytes()))
+                        duplicates[Contents[j]] = Contents[i];
+                }
+            }
+            foreach (var dup in duplicates)
+            {
+                AddFileLink(dup.Key.InternalPath, dup.Value);
+            }
+        }
+
         public void RemoveFile(string intName)
         {
             int i = Contents.FindIndex((x) => x.InternalPath.Equals(intName));
@@ -101,9 +140,9 @@ namespace bbaToolS5
             }
         }
 
-        public void WriteToBba(string file, Action<ProgressStatus> prog = null)
+        public void WriteToBba(string file, Action<ProgressStatus> prog = null, bool autoCompression = false)
         {
-            BbaWriter.WriteBba(this, file, prog);
+            BbaWriter.WriteBba(this, file, prog, autoCompression);
         }
 
         public void ReadBba(string file, Func<string, bool> shouldAdd = null, Action<ProgressStatus> prog = null)

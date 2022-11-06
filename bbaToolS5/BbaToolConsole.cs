@@ -13,6 +13,8 @@ namespace bbaToolS5
         {
             bool errexit = false;
             bool ignorehidden = false;
+            bool autoCompression = false;
+            bool searchDups = false;
             List<string> files = new List<string>();
 
             foreach (string f in args)
@@ -21,6 +23,10 @@ namespace bbaToolS5
                     errexit = true;
                 else if ("-ignorehidden".Equals(f))
                     ignorehidden = true;
+                else if ("-autoCompression".Equals(f))
+                    autoCompression = true;
+                else if ("-searchDuplicates".Equals(f))
+                    searchDups = true;
                 else
                     files.Add(f.TrimEnd('\\', '/'));
             }
@@ -84,8 +90,10 @@ namespace bbaToolS5
                 {
                     if (checkForS5x && a.GetFileByName("maps\\externalmap\\info.xml") != null)
                         output = Path.ChangeExtension(output, ".s5x");
+                    if (searchDups)
+                        a.SearchAndLinkDuplicates();
                     Console.WriteLine($"writing to archive {output}");
-                    a.WriteToBba(output, ProgressReport);
+                    a.WriteToBba(output, ProgressReport, autoCompression);
                 }
                 else
                 {

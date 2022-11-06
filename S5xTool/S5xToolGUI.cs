@@ -238,7 +238,7 @@ namespace S5xTool
                     BtnRandomGUID_Click(null, null);
                 try
                 {
-                    Archive.WriteToBba(Dlg_Save.FileName);
+                    Archive.WriteToBba(Dlg_Save.FileName, null, CB_AutoCompression.Checked);
                 }
                 catch (Exception ex)
                 {
@@ -686,6 +686,12 @@ namespace S5xTool
                 return;
             if (ListBox_Data.SelectedItem is BbaFile f)
                 f.ShouldCompess = CB_Compressed.Checked;
+        }
+
+        private void BtnSearchDuplicates_Click(object sender, EventArgs e)
+        {
+            Archive.SearchAndLinkDuplicates();
+            UpdateList(false, ListBox_Data.SelectedIndex);
         }
     }
 }
