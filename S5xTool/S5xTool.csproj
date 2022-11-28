@@ -6,7 +6,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
     <Platforms>x86</Platforms>
-    <Version>1.2.0</Version>
+    <Version>1.3.0</Version>
     <Authors>mcb</Authors>
     <Description>GUI tool to read and write SHoK bba/s5x archives</Description>
     <Copyright>Copyright © mcb 2022</Copyright>
