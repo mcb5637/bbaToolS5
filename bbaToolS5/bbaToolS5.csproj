@@ -5,7 +5,7 @@
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <Platforms>x86</Platforms>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
-    <Version>1.3.0</Version>
+    <Version>1.4.0</Version>
     <Authors>mcb</Authors>
     <Copyright>Copyright © mcb 2022</Copyright>
     <Description>command line tool to read/write SHoK bba/s5x archives</Description>
