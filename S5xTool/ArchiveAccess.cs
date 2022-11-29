@@ -47,7 +47,7 @@ namespace S5xTool
         {
             try
             {
-                A.WriteToBba(l.ToString(2));
+                A.WriteToBba(l.ToString(2), null, l.OptBool(3, false));
             }
             catch (IOException e)
             {
@@ -167,6 +167,12 @@ namespace S5xTool
         public int Clear(LuaState l)
         {
             A.Clear();
+            return 0;
+        }
+        [LuaUserdataFunction("SearchAndLinkDuplicates")]
+        public int SearchAndLinkDuplicates(LuaState l)
+        {
+            A.SearchAndLinkDuplicates();
             return 0;
         }
     }

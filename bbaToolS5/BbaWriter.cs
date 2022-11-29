@@ -40,48 +40,31 @@ namespace bbaToolS5
                 if (f is not BbaFileLink)
                 {
                     f.PosWrittenTo = w.Position;
-                    if (autoCompression)
-                    {
-                        byte[] file = f.GetBytes();
-                        byte[] compressed = ZipTools.CompressBuffer(file);
-                        int cmplen = compressed.Length + 5 * 4;
-                        if (cmplen < file.Length)
-                        {
-                            BbaCompresedFileHeader compfile = new();
-                            compfile.Adler32 = Adler.Adler32(29061971, compressed, 0, compressed.Length);
-                            compfile.CompressedSize = (uint)compressed.Length;
-                            compfile.DataLength = compfile.CompressedSize + 12;
-                            compfile.Write(wr);
-                            wr.Write(compressed);
-                            f.WrittenSize = compfile.UncompressedSize;
+                    byte[] file = f.GetBytes();
+                    byte[] compressed = null;
+                    if (autoCompression || f.ShouldCompess)
+                        compressed = ZipTools.CompressBuffer(file);
+                    if (autoCompression) {
+                        if (compressed.Length + 5 * 4 < file.Length)
                             f.ShouldCompess = true;
-                        }
                         else
-                        {
-                            wr.Write(file);
-                            f.WrittenSize = (uint)(w.Position - f.PosWrittenTo);
                             f.ShouldCompess = false;
-                        }
                     }
-                    else if (f.ShouldCompess)
+
+                    if (f.ShouldCompess)
                     {
-                        byte[] file = f.GetBytes();
                         BbaCompresedFileHeader compfile = new();
                         compfile.UncompressedSize = (uint)file.Length;
-                        file = ZipTools.CompressBuffer(file);
-                        compfile.Adler32 = Adler.Adler32(29061971, file, 0, file.Length);
-                        compfile.CompressedSize = (uint)file.Length;
+                        compfile.Adler32 = Adler.Adler32(29061971, compressed, 0, compressed.Length);
+                        compfile.CompressedSize = (uint)compressed.Length;
                         compfile.DataLength = compfile.CompressedSize + 12;
                         compfile.Write(wr);
-                        wr.Write(file);
+                        wr.Write(compressed);
                         f.WrittenSize = compfile.UncompressedSize;
                     }
                     else
                     {
-                        using (Stream s = f.GetStream())
-                        {
-                            s.CopyTo(w);
-                        }
+                        wr.Write(file);
                         f.WrittenSize = (uint)(w.Position - f.PosWrittenTo);
                     }
                     stat.AdditionalString = f.InternalPath;

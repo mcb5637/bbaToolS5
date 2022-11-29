@@ -480,28 +480,47 @@ namespace S5xTool
                 {
                     if (!CB_LoadMerge.Checked)
                         Archive.Clear();
-                    string x = "maps\\externalmap\\";
-                    string extmap = Path.GetFileName(Path.GetDirectoryName(Dlg_Open.FileName)) + ".png";
-                    //MessageBox.Show(dirname);
-                    foreach (string f in Directory.GetFiles(Path.GetDirectoryName(Dlg_Open.FileName)))
-                    {
-                        string n = Path.GetFileName(f);
-                        if (n==extmap)
-                        {
-                            ReplaceImage(f);
-                        }
-                        else
-                        {
-                            Archive.AddFileFromFilesystem(f, x + n);
-                        }
-                    }
-                    UpdateList(false, -1);
+                    ImportFolderMap(Archive, Dlg_Open.FileName);
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.ToString());
                 }
             }
+        }
+
+        private void ImportFolderMap(BbaArchive a, string path)
+        {
+            using FileStream inf = File.OpenRead(path);
+            XDocument doc = XDocument.Load(inf);
+            string externalmap = "maps\\externalmap\\";
+            string folder = Path.GetDirectoryName(path);
+            string mappreview = doc.Root.Element("MiniMapTextureName").Value;
+            string maptexturefolder = "maps\\user\\" + Path.GetFileName(folder) + "\\";
+            if (mappreview.StartsWith(maptexturefolder))
+            {
+                mappreview = mappreview.Replace(maptexturefolder, "");
+                mappreview = Path.Combine(folder, mappreview);
+                mappreview = Path.ChangeExtension(mappreview, "png");
+            }
+            else
+            {
+                MessageBox.Show("map preview not found (the path in the info.xml is invalid). please add one via Replace Map Image.");
+            }
+            a.ReadFromFolder(folder, null, true, externalmap, (n) => n != mappreview && n != path);
+            if (File.Exists(mappreview))
+            {
+                ReplaceImage(mappreview);
+            }
+            else
+            {
+                MessageBox.Show("map preview not found (file does not exist). please add one via Replace Map Image.");
+            }
+            doc.Root.Element("MiniMapTextureName").Value = "data\\graphics\\Textures\\GUI\\MapPics\\externalmap";
+            MemoryStream s = new MemoryStream();
+            doc.Save(s);
+            a.AddFileFromMem(s.ToArray(), InfoXML);
+            UpdateList(false, -1);
         }
 
         private void BtnPackScript_Click(object sender, EventArgs e)
@@ -632,6 +651,15 @@ namespace S5xTool
 
                 s.Push(log);
                 return 1;
+            });
+            L.SetTable(L.GLOBALSINDEX);
+            L.Push("ImportFolderMap");
+            L.Push((s) =>
+            {
+                BbaArchive a = s.CheckUserdata<ArchiveAccess>(1).A;
+                string info = s.ToString(2);
+                ImportFolderMap(a, info);
+                return 0;
             });
             L.SetTable(L.GLOBALSINDEX);
 #pragma warning disable CA1416 // Validate platform compatibility

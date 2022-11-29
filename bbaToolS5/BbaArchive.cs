@@ -183,24 +183,28 @@ namespace bbaToolS5
             }
         }
 
-        public void ReadFromFolder(string folder, Action<ProgressStatus> prog = null, bool ignoreHidden=false)
+        public void ReadFromFolder(string folder, Action<ProgressStatus> prog = null, bool ignoreHidden = false, string internalbase = "", Func<string, bool> shouldAdd = null)
         {
             if (!Directory.Exists(folder))
                 return;
             if (prog == null)
                 prog = (X) => { };
+            if (shouldAdd == null)
+                shouldAdd = (x) => true;
             ProgressStatus stat = new ProgressStatus();
             stat.Step = ProgressStatusStep.ReadFolder_File;
             stat.Progress = 0;
             DirectoryInfo d = new DirectoryInfo(folder);
-            ReadFromFolder(d, "", prog, stat, ignoreHidden);
+            ReadFromFolder(d, internalbase, prog, stat, ignoreHidden, shouldAdd);
         }
 
-        private void ReadFromFolder(DirectoryInfo d, string inter, Action<ProgressStatus> prog, ProgressStatus stat, bool ignorehidden)
+        private void ReadFromFolder(DirectoryInfo d, string inter, Action<ProgressStatus> prog, ProgressStatus stat, bool ignorehidden, Func<string, bool> shouldAdd)
         {
             foreach (FileInfo i in d.GetFiles())
             {
                 if (ignorehidden && (i.Attributes & FileAttributes.Hidden) == FileAttributes.Hidden)
+                    continue;
+                if (!shouldAdd(i.FullName))
                     continue;
                 string internalpath = Path.Combine(inter, i.Name);
                 AddFileFromFilesystem(i.FullName, internalpath);
@@ -211,7 +215,7 @@ namespace bbaToolS5
             {
                 if (ignorehidden && (d2.Attributes & FileAttributes.Hidden) == FileAttributes.Hidden)
                     continue;
-                ReadFromFolder(d2, Path.Combine(inter, d2.Name), prog, stat, ignorehidden);
+                ReadFromFolder(d2, Path.Combine(inter, d2.Name), prog, stat, ignorehidden, shouldAdd);
             }
         }
 
