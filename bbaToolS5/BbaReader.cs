@@ -24,16 +24,16 @@ namespace bbaToolS5
             if (prog == null)
                 prog = (X) => { };
 
-            ProgressStatus status = new ProgressStatus()
+            ProgressStatus status = new()
             {
                 Step = ProgressStatusStep.ReadBba_Header
             };
 
             StreamCache.AddRef(inp);
 
-            BinaryReader r = new BinaryReader(inp);
+            BinaryReader r = new(inp);
             // read header
-            BbaHeader fileheader = new BbaHeader();
+            BbaHeader fileheader = new();
             fileheader.Read(r);
 
             status.Progress = 100;
@@ -45,7 +45,7 @@ namespace bbaToolS5
             status.Step = ProgressStatusStep.ReadBba_Directory;
 
             r.BaseStream.Seek(fileheader.FileDataLength, SeekOrigin.Current); // skip to directory info
-            BbaDirectoryHeader dirhead = new BbaDirectoryHeader();
+            BbaDirectoryHeader dirhead = new();
             dirhead.Read(r);
 
             int cryptsize = (int)(dirhead.DataLength - 12);
@@ -53,7 +53,7 @@ namespace bbaToolS5
             SHoK_Crypt.Decrypt(dirdata);
 
             byte[] data = ZlibStream.UncompressBuffer(dirdata);
-            BinaryReader r2 = new BinaryReader(new MemoryStream(data));
+            BinaryReader r2 = new(new MemoryStream(data));
 
             int numFiles = r2.ReadInt32();
 
@@ -65,7 +65,7 @@ namespace bbaToolS5
             // read hasthable
             status.Step = ProgressStatusStep.ReadBba_HashTable;
 
-            BbaHashTableHeader hashheader = new BbaHashTableHeader();
+            BbaHashTableHeader hashheader = new();
             hashheader.Read(r);
 
             int hashTableSize = (int)hashheader.HashTableSize;
@@ -73,12 +73,12 @@ namespace bbaToolS5
             prog(status);
             status.AdditionalData = 0;
 
-            BbaHashTableEntry hashentry = new BbaHashTableEntry();
+            BbaHashTableEntry hashentry = new();
             bool found = false;
 
             for (int i = 0; i < hashTableSize; i++)
             {
-                BbaHashTableEntry hashentry2 = new BbaHashTableEntry();
+                BbaHashTableEntry hashentry2 = new();
                 hashentry2.Read(r);
                 if (hashentry2.HashValue != 0)
                 {
@@ -156,7 +156,7 @@ namespace bbaToolS5
 
         private static BbaDirStructEntry ReadDirStructEntry(BinaryReader r2, long offset)
         {
-            BbaDirStructEntry e = new BbaDirStructEntry();
+            BbaDirStructEntry e = new();
             r2.BaseStream.Seek(offset + 4, SeekOrigin.Begin);
             e.Read(r2);
             return e;

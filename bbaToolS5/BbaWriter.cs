@@ -26,7 +26,7 @@ namespace bbaToolS5
                 Progress = 0
             };
 
-            BinaryWriter wr = new BinaryWriter(w);
+            BinaryWriter wr = new(w);
             long startpos = w.Position;
             // skip header, written later
             w.Seek(BbaHeader.Size, SeekOrigin.Current);
@@ -53,10 +53,12 @@ namespace bbaToolS5
 
                     if (f.ShouldCompess)
                     {
-                        BbaCompresedFileHeader compfile = new();
-                        compfile.UncompressedSize = (uint)file.Length;
-                        compfile.Adler32 = Adler.Adler32(29061971, compressed, 0, compressed.Length);
-                        compfile.CompressedSize = (uint)compressed.Length;
+                        BbaCompresedFileHeader compfile = new()
+                        {
+                            UncompressedSize = (uint)file.Length,
+                            Adler32 = Adler.Adler32(29061971, compressed, 0, compressed.Length),
+                            CompressedSize = (uint)compressed.Length
+                        };
                         compfile.DataLength = compfile.CompressedSize + 12;
                         compfile.Write(wr);
                         wr.Write(compressed);
@@ -83,11 +85,11 @@ namespace bbaToolS5
             stat.Step = ProgressStatusStep.WriteBba_Directory;
             stat.Progress = 0;
             // write directories
-            MemoryStream direct = new MemoryStream();
-            BinaryWriter diwr = new BinaryWriter(direct);
+            MemoryStream direct = new();
+            BinaryWriter diwr = new(direct);
             diwr.Write(Count);
             WriteDirectory(diwr, root, prog, stat);
-            BbaDirectoryHeader dirhead = new BbaDirectoryHeader();
+            BbaDirectoryHeader dirhead = new();
 
             byte[] data = direct.ToArray();
             dirhead.DecompressedSize = (uint)data.Length;
@@ -121,7 +123,7 @@ namespace bbaToolS5
             BbaHashTableEntry[] hashtable = new BbaHashTableEntry[HashSize];
             WriteHashEntry(root, hashtable, mask);
 
-            BbaHashTableHeader hashheader = new BbaHashTableHeader()
+            BbaHashTableHeader hashheader = new()
             {
                 HashTableSize = (uint)HashSize,
                 HashTableLength = (uint)(HashSize * BbaHashTableEntry.Size + 4)
@@ -142,7 +144,7 @@ namespace bbaToolS5
                 }
             }
 
-            BbaHeader header = new BbaHeader()
+            BbaHeader header = new()
             {
                 ArchiveLength = (uint)(dirhead.DirLength + filesize + 32),
                 FileDataLength = (uint)filesize
@@ -222,7 +224,7 @@ namespace bbaToolS5
         private static BbaDirStructEntry BuildStructure(BbaArchive a, out int Count)
         {
             a.Contents.Sort();
-            BbaDirStructEntry root = new BbaDirStructEntry()
+            BbaDirStructEntry root = new()
             {
                 Type = BbaOutputType.Directory,
                 Timestamp = 0,

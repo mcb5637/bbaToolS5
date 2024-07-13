@@ -96,7 +96,7 @@ namespace S5xTool
         internal static void ProcessScript(BbaArchive a, string oufile, string infile, string[] paths, bool[] isarch, bool copy, bool addloader,
             bool compile, LuaState l, ref string log)
         {
-            LinkedList<string> def = new LinkedList<string>();
+            LinkedList<string> def = new();
             if (copy)
                 def.AddLast("CopyToOneFile");
             if (compile)
@@ -105,8 +105,8 @@ namespace S5xTool
             if (of == "mapscript" && addloader)
             {
                 of = "mapscript_packed";
-                MemoryStream ms = new MemoryStream();
-                StreamWriter wr = new StreamWriter(ms);
+                MemoryStream ms = new();
+                StreamWriter wr = new(ms);
                 wr.WriteLine("-- Warning: Map script and additional map data is included as extra files in this archive. Do not save this map file from editor!");
                 wr.WriteLine("-- Warnung: Mapscript und weitere Mapdaten in diesem Archiv als extra Dateien enthalten. Nicht im Editor Speichern!");
                 if (copy)
@@ -132,7 +132,7 @@ namespace S5xTool
         {
             loaded.AddLast(infile);
             MemoryStream m = (copytogether && copy!=null) ? copy : new MemoryStream();
-            StreamWriter wr = new StreamWriter(m);
+            StreamWriter wr = new(m);
 
             using (Stream s = SearchFile(a, paths, isarch, infile))
             {
@@ -141,7 +141,7 @@ namespace S5xTool
                     log += $"ERROR: did not find file {infile}!\n";
                     return;
                 }
-                StreamReader sr = new StreamReader(s);
+                StreamReader sr = new(s);
                 string line = sr.ReadLine();
                 while (line != null)
                 {
@@ -323,7 +323,7 @@ namespace S5xTool
                     catch (LuaException) { }
                 }
                 if (!done)
-                    throw e;
+                    throw new LuaException("error compiling file", e);
             }
             byte[] r = L.Dump();
             L.Pop(1);

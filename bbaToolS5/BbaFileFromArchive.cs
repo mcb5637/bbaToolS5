@@ -50,16 +50,16 @@ namespace bbaToolS5
 
         private byte[] GetDataUncompressed()
         {
-            BinaryReader r = new BinaryReader(s);
+            BinaryReader r = new(s);
             r.BaseStream.Seek(FileOffset, SeekOrigin.Begin);
             return r.ReadBytes((int)FileLength);
         }
 
         private byte[] GetDataCompressed()
         {
-            BinaryReader r = new BinaryReader(s);
+            BinaryReader r = new(s);
             r.BaseStream.Seek(FileOffset, SeekOrigin.Begin);
-            BbaCompresedFileHeader h = new BbaCompresedFileHeader();
+            BbaCompresedFileHeader h = new();
             h.Read(r);
             byte[] data = r.ReadBytes((int)h.CompressedSize);
             return ZlibStream.UncompressBuffer(data);

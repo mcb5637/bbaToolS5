@@ -10,7 +10,7 @@ namespace bbaToolS5
 {
     public class BbaArchive : IEnumerable<BbaFile>
     {
-        internal List<BbaFile> Contents = new List<BbaFile>();
+        internal List<BbaFile> Contents = new();
 
         public IEnumerator<BbaFile> GetEnumerator()
         {
@@ -184,18 +184,18 @@ namespace bbaToolS5
                 Directory.Delete(folder, true);
             int total = Contents.Count;
             int current = 0;
-            ProgressStatus stat = new ProgressStatus();
-            stat.Step = ProgressStatusStep.WriteFolder_File;
+            ProgressStatus stat = new()
+            {
+                Step = ProgressStatusStep.WriteFolder_File
+            };
             foreach (BbaFile f in this)
             {
                 string path = Path.Combine(folder, f.InternalPath);
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
-                using (FileStream w = new FileStream(path, FileMode.Create, FileAccess.Write))
+                using (FileStream w = new(path, FileMode.Create, FileAccess.Write))
                 {
-                    using (Stream s = f.GetStream())
-                    {
-                        s.CopyTo(w);
-                    }
+                    using Stream s = f.GetStream();
+                    s.CopyTo(w);
                 }
                 current++;
                 stat.Progress = 100 * current / total;
@@ -212,10 +212,12 @@ namespace bbaToolS5
                 prog = (X) => { };
             if (shouldAdd == null)
                 shouldAdd = (x) => true;
-            ProgressStatus stat = new ProgressStatus();
-            stat.Step = ProgressStatusStep.ReadFolder_File;
-            stat.Progress = 0;
-            DirectoryInfo d = new DirectoryInfo(folder);
+            ProgressStatus stat = new()
+            {
+                Step = ProgressStatusStep.ReadFolder_File,
+                Progress = 0
+            };
+            DirectoryInfo d = new(folder);
             ReadFromFolder(d, internalbase, prog, stat, ignoreHidden, shouldAdd);
         }
 

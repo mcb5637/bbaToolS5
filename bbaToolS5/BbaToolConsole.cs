@@ -15,7 +15,7 @@ namespace bbaToolS5
             bool ignorehidden = false;
             bool autoCompression = false;
             bool searchDups = false;
-            List<string> files = new List<string>();
+            List<string> files = new();
 
             foreach (string f in args)
             {
@@ -67,7 +67,7 @@ namespace bbaToolS5
                         throw new IOException($"{p} does not exist");
                     }
                 }
-                BbaArchive a = new BbaArchive();
+                BbaArchive a = new();
                 foreach (string fi in files)
                 {
                     string f = Path.GetFullPath(fi);

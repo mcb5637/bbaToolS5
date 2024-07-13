@@ -23,7 +23,7 @@ namespace S5xTool
         private const string ExternalMapMed = "graphics\\texturesmed\\gui\\mappics\\externalmap.png";
         private BbaArchive Archive;
         private bool Updating = false;
-        private readonly FilePeek peek = new FilePeek();
+        private readonly FilePeek peek = new();
         private LuaState L = new LuaState50();
 
         public S5xToolGUI()
@@ -45,40 +45,36 @@ namespace S5xTool
                 ListBox_Data.Items.Add(f);
                 if (f.InternalPath == InfoXML)
                 {
-                    using (Stream stream = f.GetStream())
+                    using Stream stream = f.GetStream();
+                    XDocument doc = XDocument.Load(stream);
+                    if (bool.TryParse(doc.Root.Element("MPFlag").Value, out bool mp) && mp)
                     {
-                        XDocument doc = XDocument.Load(stream);
-                        if (bool.TryParse(doc.Root.Element("MPFlag").Value, out bool mp) && mp)
+                        if (int.TryParse(doc.Root.Element("MPPlayerCount").Value, out int mpcount))
                         {
-                            if (int.TryParse(doc.Root.Element("MPPlayerCount").Value, out int mpcount))
-                            {
-                                ComboBox_MPType.SelectedIndex = mpcount;
-                            }
-                            else
-                            {
-                                ComboBox_MPType.SelectedIndex = 1;
-                            }
+                            ComboBox_MPType.SelectedIndex = mpcount;
                         }
                         else
                         {
-                            ComboBox_MPType.SelectedIndex = 0;
+                            ComboBox_MPType.SelectedIndex = 1;
                         }
-                        if (int.TryParse(doc.Root.Element("Key")?.Value, out int key))
-                            ComboBox_Key.SelectedIndex = key;
-                        else
-                            ComboBox_Key.SelectedIndex = -1;
-                        setindex = true; 
                     }
+                    else
+                    {
+                        ComboBox_MPType.SelectedIndex = 0;
+                    }
+                    if (int.TryParse(doc.Root.Element("Key")?.Value, out int key))
+                        ComboBox_Key.SelectedIndex = key;
+                    else
+                        ComboBox_Key.SelectedIndex = -1;
+                    setindex = true;
                 }
                 else if (f.InternalPath == ExternalMapMain)
                 {
-                    using (Stream stream = f.GetStream())
-                    {
+                    using Stream stream = f.GetStream();
 #pragma warning disable CA1416 // Validate platform compatibility
-                        PicBoxPreviewImg.Image = Image.FromStream(stream);
+                    PicBoxPreviewImg.Image = Image.FromStream(stream);
 #pragma warning restore CA1416 // Validate platform compatibility
-                        setPic = true;
-                    }
+                    setPic = true;
                 }
             }
             if (!setindex)
@@ -212,13 +208,9 @@ namespace S5xTool
                 {
                     try
                     {
-                        using (Stream s = new FileStream(Dlg_Save.FileName, FileMode.Create, FileAccess.Write))
-                        {
-                            using (Stream i = f.GetStream())
-                            {
-                                i.CopyTo(s);
-                            }
-                        }
+                        using Stream s = new FileStream(Dlg_Save.FileName, FileMode.Create, FileAccess.Write);
+                        using Stream i = f.GetStream();
+                        i.CopyTo(s);
                     }
                     catch (Exception ex)
                     {
@@ -266,15 +258,13 @@ namespace S5xTool
             BbaFile f = ar.GetFileByName(InfoXML);
             if (f != null)
             {
-                using (Stream st = f.GetStream())
-                {
-                    XDocument doc = XDocument.Load(st);
-                    doc.Root.Element("GUID").Element("Data").Value = guid;
-                    MemoryStream s = new MemoryStream();
-                    doc.Save(s);
-                    ar.AddFileFromMem(s.ToArray(), InfoXML);
-                    return true;
-                }
+                using Stream st = f.GetStream();
+                XDocument doc = XDocument.Load(st);
+                doc.Root.Element("GUID").Element("Data").Value = guid;
+                MemoryStream s = new();
+                doc.Save(s);
+                ar.AddFileFromMem(s.ToArray(), InfoXML);
+                return true;
             }
             return false;
         }
@@ -283,16 +273,14 @@ namespace S5xTool
             BbaFile f = ar.GetFileByName(InfoXML);
             if (f != null)
             {
-                using (Stream st = f.GetStream())
-                {
-                    XDocument doc = XDocument.Load(st);
-                    doc.Root.Element("Name").Value = name;
-                    doc.Root.Element("Desc").Value = text;
-                    MemoryStream s = new MemoryStream();
-                    doc.Save(s);
-                    ar.AddFileFromMem(s.ToArray(), InfoXML);
-                    return true;
-                }
+                using Stream st = f.GetStream();
+                XDocument doc = XDocument.Load(st);
+                doc.Root.Element("Name").Value = name;
+                doc.Root.Element("Desc").Value = text;
+                MemoryStream s = new();
+                doc.Save(s);
+                ar.AddFileFromMem(s.ToArray(), InfoXML);
+                return true;
             }
             return false;
         }
@@ -301,12 +289,10 @@ namespace S5xTool
             BbaFile f = ar.GetFileByName(InfoXML);
             if (f != null)
             {
-                using (Stream st = f.GetStream())
-                {
-                    XDocument doc = XDocument.Load(st);
-                    name = doc.Root.Element("Name").Value;
-                    return doc.Root.Element("Desc").Value;
-                }
+                using Stream st = f.GetStream();
+                XDocument doc = XDocument.Load(st);
+                name = doc.Root.Element("Name").Value;
+                return doc.Root.Element("Desc").Value;
             }
             name = null;
             return null;
@@ -331,16 +317,14 @@ namespace S5xTool
             BbaFile f = Archive.GetFileByName(InfoXML);
             if (f != null)
             {
-                using (Stream st = f.GetStream())
-                {
-                    XDocument doc = XDocument.Load(st);
-                    doc.Root.Element("MPFlag").Value = mp.ToString().ToLower();
-                    doc.Root.Element("MPPlayerCount").Value = maxp.ToString();
-                    MemoryStream s = new MemoryStream();
-                    doc.Save(s);
-                    Archive.AddFileFromMem(s.ToArray(), InfoXML);
-                    UpdateList(true, -1);
-                }
+                using Stream st = f.GetStream();
+                XDocument doc = XDocument.Load(st);
+                doc.Root.Element("MPFlag").Value = mp.ToString().ToLower();
+                doc.Root.Element("MPPlayerCount").Value = maxp.ToString();
+                MemoryStream s = new();
+                doc.Save(s);
+                Archive.AddFileFromMem(s.ToArray(), InfoXML);
+                UpdateList(true, -1);
             }
             Updating = false;
         }
@@ -356,22 +340,20 @@ namespace S5xTool
             BbaFile f = Archive.GetFileByName(InfoXML);
             if (f != null)
             {
-                using (Stream st = f.GetStream())
+                using Stream st = f.GetStream();
+                XDocument doc = XDocument.Load(st);
+                if (doc.Root.Element("Key") == null)
                 {
-                    XDocument doc = XDocument.Load(st);
-                    if (doc.Root.Element("Key")==null)
-                    {
-                        doc.Root.Add(new XElement("Key", key.ToString()));
-                    }
-                    else
-                    {
-                        doc.Root.Element("Key").Value = key.ToString();
-                    }
-                    MemoryStream s = new MemoryStream();
-                    doc.Save(s);
-                    Archive.AddFileFromMem(s.ToArray(), InfoXML);
-                    UpdateList(true, -1);
+                    doc.Root.Add(new XElement("Key", key.ToString()));
                 }
+                else
+                {
+                    doc.Root.Element("Key").Value = key.ToString();
+                }
+                MemoryStream s = new();
+                doc.Save(s);
+                Archive.AddFileFromMem(s.ToArray(), InfoXML);
+                UpdateList(true, -1);
             }
             Updating = false;
         }
@@ -380,11 +362,9 @@ namespace S5xTool
         {
             if (ListBox_Data.SelectedItem is BbaFile f)
             {
-                using (Stream st = f.GetStream())
-                {
-                    StreamReader re = new StreamReader(st);
-                    peek.ShowFilePeek(re.ReadToEnd());
-                }
+                using Stream st = f.GetStream();
+                StreamReader re = new(st);
+                peek.ShowFilePeek(re.ReadToEnd());
             }
         }
 
@@ -518,7 +498,7 @@ namespace S5xTool
                 MessageBox.Show("map preview not found (file does not exist). please add one via Replace Map Image.");
             }
             doc.Root.Element("MiniMapTextureName").Value = "data\\graphics\\Textures\\GUI\\MapPics\\externalmap";
-            MemoryStream s = new MemoryStream();
+            MemoryStream s = new();
             doc.Save(s);
             a.AddFileFromMem(s.ToArray(), InfoXML);
             UpdateList(false, -1);
@@ -631,8 +611,8 @@ namespace S5xTool
                 string ofile = s.ToString(2);
                 string ifile = s.ToString(3);
                 string log = "";
-                List<string> path = new List<string>();
-                List<bool> isarch = new List<bool>();
+                List<string> path = new();
+                List<bool> isarch = new();
                 foreach (int i in s.IPairs(4))
                 {
                     s.Push("Path");

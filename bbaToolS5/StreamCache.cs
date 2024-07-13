@@ -9,7 +9,7 @@ namespace bbaToolS5
 {
     internal class StreamCache
     {
-        private static Dictionary<Stream, int> Cache = new Dictionary<Stream, int>();
+        private static Dictionary<Stream, int> Cache = new();
 
         internal static void AddRef(Stream s)
         {

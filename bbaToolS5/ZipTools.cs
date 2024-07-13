@@ -12,14 +12,12 @@ namespace bbaToolS5
     {
         internal static byte[] CompressBuffer(byte[] b)
         {
-            using (MemoryStream ms = new MemoryStream())
+            using MemoryStream ms = new();
+            using (ZlibStream compressor = new(ms, CompressionMode.Compress, CompressionLevel.BestCompression))
             {
-                using (ZlibStream compressor = new ZlibStream(ms, CompressionMode.Compress, CompressionLevel.BestCompression))
-                {
-                    compressor.Write(b, 0, b.Length);
-                }
-                return ms.ToArray();
+                compressor.Write(b, 0, b.Length);
             }
+            return ms.ToArray();
         }
     }
 }
