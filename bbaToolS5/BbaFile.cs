@@ -10,6 +10,7 @@ namespace bbaToolS5
     public abstract class BbaFile : IComparable<BbaFile>
     {
         internal static string[] CompressedExt = new string[] { ".xml", ".lua", ".bin", ".fdb", ".fx", ".txt" };
+        internal static string[] NeverCompressExt = new string[] { ".wav", ".mp3" };
 
         public string InternalPath
         {
@@ -20,6 +21,8 @@ namespace bbaToolS5
         internal virtual long PosWrittenTo { get; set; }
         internal virtual uint WrittenSize { get; set; }
         public virtual bool ShouldCompess { get; set; }
+        // needs to be read as stream from the bba => cannot be compressed (any sound file)
+        public bool NeverCompress => NeverCompressExt.Contains(Path.GetExtension(InternalPath));
 
         public abstract Stream GetStream();
         public abstract byte[] GetBytes();

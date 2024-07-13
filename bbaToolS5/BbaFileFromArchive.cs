@@ -35,17 +35,14 @@ namespace bbaToolS5
 
         public override byte[] GetBytes()
         {
-            byte[] data;
             if (IsCompressed)
             {
-
-                data = GetDataCompressed();
+                return GetDataCompressed();
             }
             else
             {
-                data = GetDataUncompressed();
+                return GetDataUncompressed();
             }
-            return data;
         }
 
         private byte[] GetDataUncompressed()

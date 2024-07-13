@@ -42,16 +42,16 @@ namespace bbaToolS5
                     f.PosWrittenTo = w.Position;
                     byte[] file = f.GetBytes();
                     byte[] compressed = null;
-                    if (autoCompression || f.ShouldCompess)
+                    if ((autoCompression && !f.NeverCompress) || f.ShouldCompess)
                         compressed = ZipTools.CompressBuffer(file);
-                    if (autoCompression) {
+                    if (autoCompression && !f.NeverCompress) {
                         if (compressed.Length + 5 * 4 < file.Length)
                             f.ShouldCompess = true;
                         else
                             f.ShouldCompess = false;
                     }
 
-                    if (f.ShouldCompess)
+                    if (f.ShouldCompess && !f.NeverCompress)
                     {
                         BbaCompresedFileHeader compfile = new()
                         {
