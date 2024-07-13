@@ -244,6 +244,7 @@ namespace S5xTool
                 {
                     MessageBox.Show(ex.ToString());
                 }
+                UpdateList(false, ListBox_Data.SelectedIndex);
             }
         }
 

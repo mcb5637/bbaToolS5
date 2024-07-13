@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace bbaToolS5
 {
+    // Note: BbaArchive.RemoveFile implementation assumes that BbaFileLink.Remove() is empty
     internal class BbaFileLink : BbaFile
     {
         public BbaFile Linked { get; internal set; }

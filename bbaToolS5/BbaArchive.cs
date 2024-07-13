@@ -24,6 +24,15 @@ namespace bbaToolS5
 
         internal void AddFile(BbaFile f)
         {
+            BbaFile prev = GetFileByName(f.InternalPath);
+            if (prev != null)
+            {
+                foreach (BbaFile c in Contents)
+                {
+                    if (c is BbaFileLink fl && fl.Linked == prev)
+                        fl.Linked = f;
+                }
+            }
             RemoveFile(f.InternalPath);
             Contents.Add(f);
             f.SetCompressByExtension();
@@ -91,6 +100,8 @@ namespace bbaToolS5
             int i = Contents.FindIndex((x) => x.InternalPath.Equals(intName));
             if (i >= 0)
             {
+                Contents.RemoveAll((BbaFile c) => c is BbaFileLink fl && fl.Linked == Contents[i]);
+
                 Contents[i].Remove();
                 Contents.RemoveAt(i);
             }
@@ -131,28 +142,38 @@ namespace bbaToolS5
             return Contents.FirstOrDefault((x) => x.InternalPath.Equals(name));
         }
 
-        public void LoadToMemory()
+        public void LoadToMemory(Func<BbaFile, bool> select = null)
         {
-            BbaFile f = Contents.FirstOrDefault((fi) => fi is not BbaFileFromMem);
+            if (select == null)
+                select = (BbaFile f) => true;
+            BbaFile f = get();
             while (f != null) {
                 AddFileFromMem(f.GetBytes(), f.InternalPath);
-                f = Contents.FirstOrDefault((fi) => fi is not BbaFileFromMem);
+                f = get();
+            }
+
+            BbaFile get()
+            {
+                return Contents.FirstOrDefault((BbaFile fi) => !(fi is BbaFileFromMem || fi is BbaFileLink) && select(fi)); ;
             }
         }
 
         public void WriteToBba(string file, Action<ProgressStatus> prog = null, bool autoCompression = false)
         {
+            file = Path.GetFullPath(file);
+            LoadToMemory((BbaFile f) => f is BbaFileFromArchive a && a.SourceFilePath == file);
             BbaWriter.WriteBba(this, file, prog, autoCompression);
         }
 
         public void ReadBba(string file, Func<string, bool> shouldAdd = null, Action<ProgressStatus> prog = null)
         {
+            file = Path.GetFullPath(file);
             BbaReader.ReadBba(file, this, shouldAdd, prog);
         }
 
         public void ReadBba(string file, string internalFile)
         {
-            ReadBba(file, (x) => x.Equals(internalFile), null);
+            ReadBba(file, (string x) => x.Equals(internalFile), null);
         }
 
         public void WriteToFolder(string folder, Action<ProgressStatus> prog = null)
