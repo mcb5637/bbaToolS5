@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace bbaToolS5
@@ -97,7 +98,7 @@ namespace bbaToolS5
 
         public void RemoveFile(string intName)
         {
-            int i = Contents.FindIndex((x) => x.InternalPath.Equals(intName));
+            int i = Contents.FindIndex((x) => x.InternalPath.Equals(intName, StringComparison.OrdinalIgnoreCase));
             if (i >= 0)
             {
                 Contents.RemoveAll((BbaFile c) => c is BbaFileLink fl && fl.Linked == Contents[i]);
@@ -118,7 +119,7 @@ namespace bbaToolS5
         {
             newName = FixPath(newName);
             RemoveFile(newName);
-            int i = Contents.FindIndex((x) => x.InternalPath.Equals(currName));
+            int i = Contents.FindIndex((x) => x.InternalPath.Equals(currName, StringComparison.OrdinalIgnoreCase));
             if (i >= 0)
             {
                 Contents[i].InternalPath = newName;
@@ -139,7 +140,8 @@ namespace bbaToolS5
 
         public BbaFile GetFileByName(string name)
         {
-            return Contents.FirstOrDefault((x) => x.InternalPath.Equals(name));
+            name = FixPath(name);
+            return Contents.FirstOrDefault((x) => x.InternalPath.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
 
         public void LoadToMemory(Func<BbaFile, bool> select = null)
@@ -173,7 +175,7 @@ namespace bbaToolS5
 
         public void ReadBba(string file, string internalFile)
         {
-            ReadBba(file, (string x) => x.Equals(internalFile), null);
+            ReadBba(file, (string x) => x.Equals(internalFile, StringComparison.OrdinalIgnoreCase), null);
         }
 
         public void WriteToFolder(string folder, Action<ProgressStatus> prog = null)
@@ -188,6 +190,16 @@ namespace bbaToolS5
             {
                 Step = ProgressStatusStep.WriteFolder_File
             };
+            bool remFL = false;
+            if (GetFileByName(FileLinksFile) == null)
+            {
+                byte[] fl = CreateFileLinks();
+                if (fl != null)
+                {
+                    remFL = true;
+                    AddFileFromMem(fl, FileLinksFile);
+                }
+            }
             foreach (BbaFile f in this)
             {
                 string path = Path.Combine(folder, f.InternalPath);
@@ -201,6 +213,10 @@ namespace bbaToolS5
                 stat.Progress = 100 * current / total;
                 stat.AdditionalString = f.InternalPath;
                 prog(stat);
+            }
+            if (remFL)
+            {
+                RemoveFile(FileLinksFile);
             }
         }
 
@@ -219,6 +235,12 @@ namespace bbaToolS5
             };
             DirectoryInfo d = new(folder);
             ReadFromFolder(d, internalbase, prog, stat, ignoreHidden, shouldAdd);
+            BbaFile filel = GetFileByName(FileLinksFile);
+            if (filel != null)
+            {
+                ResolveFileLinks(filel.GetBytes());
+                RemoveFile(FileLinksFile);
+            }
         }
 
         private void ReadFromFolder(DirectoryInfo d, string inter, Action<ProgressStatus> prog, ProgressStatus stat, bool ignorehidden, Func<string, bool> shouldAdd)
@@ -253,5 +275,37 @@ namespace bbaToolS5
         {
             Clear();
         }
+
+        private class FileLink
+        {
+            public string From { get; set; }
+            public string To { get; set; }
+        }
+        private byte[] CreateFileLinks()
+        {
+            List<FileLink> l = new();
+            foreach (BbaFile f in this)
+            {
+                if (f is BbaFileLink lf)
+                {
+                    l.Add(new FileLink()
+                    {
+                        From = lf.Linked.InternalPath,
+                        To = lf.InternalPath,
+                    });
+                }
+            }
+            if (l.Count == 0)
+                return null;
+            return JsonSerializer.SerializeToUtf8Bytes(l);
+        }
+        private void ResolveFileLinks(byte[] links)
+        {
+            foreach (FileLink f in JsonSerializer.Deserialize<List<FileLink>>(links))
+            {
+                AddFileLink(f.To, f.From);
+            }
+        }
+        private const string FileLinksFile = "FileLinks.json";
     }
 }
