@@ -10,7 +10,11 @@
     <Description>command line tool to read/write SHoK bba/s5x archives</Description>
     <Platforms>AnyCPU;x64;x86</Platforms>
     <Nullable>enable</Nullable>
+	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\AssemblyInfo.cs" Link="AssemblyInfo.cs" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />

@@ -10,9 +10,13 @@
     <Description>GUI tool to read and write SHoK bba/s5x archives</Description>
     <Copyright>Copyright © mcb 2022</Copyright>
     <Platforms>AnyCPU;x64;x86</Platforms>
+	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="LuaSharp\LuaState51.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\AssemblyInfo.cs" Link="AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="lua50\bin2c50.exe" />
