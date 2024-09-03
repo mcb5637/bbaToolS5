@@ -9,6 +9,7 @@
     <Copyright>Copyright © mcb 2022</Copyright>
     <Description>command line tool to read/write SHoK bba/s5x archives</Description>
     <Platforms>AnyCPU;x64;x86</Platforms>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />

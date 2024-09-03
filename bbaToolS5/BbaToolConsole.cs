@@ -15,7 +15,7 @@ namespace bbaToolS5
             bool ignorehidden = false;
             bool autoCompression = false;
             bool searchDups = false;
-            List<string> files = new();
+            List<string> files = [];
 
             foreach (string f in args)
             {
