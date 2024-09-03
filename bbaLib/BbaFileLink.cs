@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace bbaToolS5
+namespace bbaLib
 {
     // Note: BbaArchive.RemoveFile implementation assumes that BbaFileLink.Remove() is empty
     internal class BbaFileLink : BbaFile

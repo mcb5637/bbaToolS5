@@ -7,11 +7,17 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
-namespace bbaToolS5
+namespace bbaLib
 {
     public class BbaArchive : IEnumerable<BbaFile>
     {
+        public const string InfoXML = "maps\\externalmap\\info.xml";
+        public const string ExternalMapMain = "graphics\\textures\\gui\\mappics\\externalmap.png";
+        public const string ExternalMapLow = "graphics\\textureslow\\gui\\mappics\\externalmap.png";
+        public const string ExternalMapMed = "graphics\\texturesmed\\gui\\mappics\\externalmap.png";
+
         internal List<BbaFile> Contents = [];
 
         public IEnumerator<BbaFile> GetEnumerator()
@@ -40,34 +46,40 @@ namespace bbaToolS5
             f.SetCompressByExtension();
         }
 
-        public void AddFileFromFilesystem(string path, string internalpath)
+        public BbaFile AddFileFromFilesystem(string path, string internalpath)
         {
-            AddFile(new BbaFileFromFilesystem()
+            BbaFileFromFilesystem f = new()
             {
                 InternalPath = FixPath(internalpath),
                 SourceFilePath = path
-            });
+            };
+            AddFile(f);
+            return f;
         }
 
-        public void AddFileFromMem(byte[] data, string internalPath)
+        public BbaFile AddFileFromMem(byte[] data, string internalPath)
         {
-            AddFile(new BbaFileFromMem()
+            BbaFileFromMem f = new()
             {
                 InternalPath = FixPath(internalPath),
                 Data = data
-            });
+            };
+            AddFile(f);
+            return f;
         }
 
-        public void AddFileLink(string path, BbaFile to)
+        public BbaFile AddFileLink(string path, BbaFile to)
         {
             ArgumentNullException.ThrowIfNull(to);
             if (!Contents.Contains(to))
                 throw new ArgumentException("to has to be in the archive");
-            AddFile(new BbaFileLink()
+            BbaFileLink f = new()
             {
                 InternalPath = FixPath(path),
                 Linked = to,
-            });
+            };
+            AddFile(f);
+            return f;
         }
 
         public void AddFileLink(string path, string original)
@@ -305,8 +317,58 @@ namespace bbaToolS5
                 AddFileLink(f.To, f.From);
             }
         }
-        private const string FileLinksFile = "FileLinks.json";
+        public const string FileLinksFile = "FileLinks.json";
 
+        public S5MapInfo? MapInfo
+        {
+            get
+            {
+                BbaFile? f = GetFileByName(InfoXML);
+                if (f == null)
+                    return null;
+                using Stream s = f.GetStream();
+                try
+                {
+                    return new XmlSerializer(typeof(S5MapInfo)).Deserialize(s) as S5MapInfo;
+                }
+                catch (InvalidOperationException)
+                {
+                    return null;
+                }
+            }
+            set
+            {
+                if (value == null)
+                {
+                    RemoveFile(InfoXML);
+                    return;
+                }
+                using MemoryStream s = new();
+                new XmlSerializer(typeof(S5MapInfo)).Serialize(s, value);
+                AddFileFromMem(s.GetBuffer(), InfoXML);
+            }
+        }
+        public Stream? MinimapTexture
+        {
+            get => GetFileByName(ExternalMapMain)?.GetStream();
+        }
+        private void SetMinimapTextureLinks(BbaFile f)
+        {
+            AddFileLink(ExternalMapLow, f);
+            AddFileLink(ExternalMapMed, f);
+        }
+        public BbaFile SetMinimapTextureFromFilesystem(string file)
+        {
+            BbaFile f = AddFileFromFilesystem(file, ExternalMapMain);
+            SetMinimapTextureLinks(f);
+            return f;
+        }
+        public BbaFile SetMinimapTextureFromMem(byte[] b)
+        {
+            BbaFile f = AddFileFromMem(b, ExternalMapMain);
+            SetMinimapTextureLinks(f);
+            return f;
+        }
     }
     internal class FileLink
     {

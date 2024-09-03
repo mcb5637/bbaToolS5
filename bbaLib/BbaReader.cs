@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace bbaToolS5
+namespace bbaLib
 {
     public static class BbaReader
     {

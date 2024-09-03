@@ -1,4 +1,4 @@
-﻿using bbaToolS5;
+﻿using bbaLib;
 using LuaSharp;
 using Microsoft.Win32;
 using System;
@@ -18,9 +18,6 @@ namespace S5xTool
     public partial class S5xToolGUI : Form
     {
         private const string InfoXML = "maps\\externalmap\\info.xml";
-        private const string ExternalMapMain = "graphics\\textures\\gui\\mappics\\externalmap.png";
-        private const string ExternalMapLow = "graphics\\textureslow\\gui\\mappics\\externalmap.png";
-        private const string ExternalMapMed = "graphics\\texturesmed\\gui\\mappics\\externalmap.png";
         private BbaArchive Archive;
         private bool Updating = false;
         private readonly FilePeek peek = new();
@@ -38,52 +35,33 @@ namespace S5xTool
         {
             Updating = true;
             ListBox_Data.Items.Clear();
-            bool setindex = false;
-            bool setPic = false;
             foreach (BbaFile f in Archive)
             {
                 ListBox_Data.Items.Add(f);
-                if (f.InternalPath == InfoXML)
-                {
-                    using Stream stream = f.GetStream();
-                    XDocument doc = XDocument.Load(stream);
-                    if (bool.TryParse(doc.Root.Element("MPFlag").Value, out bool mp) && mp)
-                    {
-                        if (int.TryParse(doc.Root.Element("MPPlayerCount").Value, out int mpcount))
-                        {
-                            ComboBox_MPType.SelectedIndex = mpcount;
-                        }
-                        else
-                        {
-                            ComboBox_MPType.SelectedIndex = 1;
-                        }
-                    }
-                    else
-                    {
-                        ComboBox_MPType.SelectedIndex = 0;
-                    }
-                    if (int.TryParse(doc.Root.Element("Key")?.Value, out int key))
-                        ComboBox_Key.SelectedIndex = key;
-                    else
-                        ComboBox_Key.SelectedIndex = -1;
-                    setindex = true;
-                }
-                else if (f.InternalPath == ExternalMapMain)
-                {
-                    using Stream stream = f.GetStream();
-#pragma warning disable CA1416 // Validate platform compatibility
-                    PicBoxPreviewImg.Image = Image.FromStream(stream);
-#pragma warning restore CA1416 // Validate platform compatibility
-                    setPic = true;
-                }
             }
-            if (!setindex)
+            S5MapInfo inf = Archive.MapInfo;
+            if (inf != null)
+            {
+                if (inf.MPFlag)
+                    ComboBox_MPType.SelectedIndex = inf.MPPlayerCount;
+                else
+                    ComboBox_MPType.SelectedIndex = 0;
+                ComboBox_Key.SelectedIndex = inf.Key;
+            }
+            else
             {
                 ComboBox_MPType.SelectedIndex = -1;
                 ComboBox_Key.SelectedIndex = -1;
             }
-            if (!setPic)
+            using Stream stream = Archive.MinimapTexture;
+            if (stream != null)
+            {
+                PicBoxPreviewImg.Image = Image.FromStream(stream);
+            }
+            else
+            {
                 PicBoxPreviewImg.Image = null;
+            }
             if (selectLast)
                 ListBox_Data.SelectedIndex = ListBox_Data.Items.Count - 1;
             else if (toSelect > 0)
@@ -148,7 +126,7 @@ namespace S5xTool
                 CB_Compressed.Enabled = false;
                 CB_Compressed.Checked = false;
             }
-            bool hasInfo = Archive.GetFileByName(InfoXML) != null;
+            bool hasInfo = Archive.GetFileByName(BbaArchive.InfoXML) != null;
             BtnRenameTo.Enabled = enable;
             BtnRemove.Enabled = enable;
             BtnExportFile.Enabled = enable;
@@ -255,44 +233,34 @@ namespace S5xTool
 
         private bool SetGUID(BbaArchive ar, string guid)
         {
-            BbaFile f = ar.GetFileByName(InfoXML);
-            if (f != null)
+            S5MapInfo i = ar.MapInfo;
+            if (i != null)
             {
-                using Stream st = f.GetStream();
-                XDocument doc = XDocument.Load(st);
-                doc.Root.Element("GUID").Element("Data").Value = guid;
-                MemoryStream s = new();
-                doc.Save(s);
-                ar.AddFileFromMem(s.ToArray(), InfoXML);
+                i.GUID.Data = guid;
+                ar.MapInfo = i;
                 return true;
             }
             return false;
         }
         private bool SetNameAndText(BbaArchive ar, string name, string text)
         {
-            BbaFile f = ar.GetFileByName(InfoXML);
-            if (f != null)
+            S5MapInfo i = ar.MapInfo;
+            if (i != null)
             {
-                using Stream st = f.GetStream();
-                XDocument doc = XDocument.Load(st);
-                doc.Root.Element("Name").Value = name;
-                doc.Root.Element("Desc").Value = text;
-                MemoryStream s = new();
-                doc.Save(s);
-                ar.AddFileFromMem(s.ToArray(), InfoXML);
+                i.Name = name;
+                i.Desc = text;
+                ar.MapInfo = i;
                 return true;
             }
             return false;
         }
         private string GetNameAndText(BbaArchive ar, out string name)
         {
-            BbaFile f = ar.GetFileByName(InfoXML);
-            if (f != null)
+            S5MapInfo i = ar.MapInfo;
+            if (i != null)
             {
-                using Stream st = f.GetStream();
-                XDocument doc = XDocument.Load(st);
-                name = doc.Root.Element("Name").Value;
-                return doc.Root.Element("Desc").Value;
+                name = i.Name;
+                return i.Desc;
             }
             name = null;
             return null;
@@ -314,16 +282,12 @@ namespace S5xTool
             if (mp)
                 maxp = ComboBox_MPType.SelectedIndex;
             Updating = true;
-            BbaFile f = Archive.GetFileByName(InfoXML);
-            if (f != null)
+            S5MapInfo i = Archive.MapInfo;
+            if (i != null)
             {
-                using Stream st = f.GetStream();
-                XDocument doc = XDocument.Load(st);
-                doc.Root.Element("MPFlag").Value = mp.ToString().ToLower();
-                doc.Root.Element("MPPlayerCount").Value = maxp.ToString();
-                MemoryStream s = new();
-                doc.Save(s);
-                Archive.AddFileFromMem(s.ToArray(), InfoXML);
+                i.MPFlag = mp;
+                i.MPPlayerCount = maxp;
+                Archive.MapInfo = i;
                 UpdateList(true, -1);
             }
             Updating = false;
@@ -337,22 +301,11 @@ namespace S5xTool
                 return;
             int key = ComboBox_Key.SelectedIndex;
             Updating = true;
-            BbaFile f = Archive.GetFileByName(InfoXML);
-            if (f != null)
+            S5MapInfo i = Archive.MapInfo;
+            if (i != null)
             {
-                using Stream st = f.GetStream();
-                XDocument doc = XDocument.Load(st);
-                if (doc.Root.Element("Key") == null)
-                {
-                    doc.Root.Add(new XElement("Key", key.ToString()));
-                }
-                else
-                {
-                    doc.Root.Element("Key").Value = key.ToString();
-                }
-                MemoryStream s = new();
-                doc.Save(s);
-                Archive.AddFileFromMem(s.ToArray(), InfoXML);
+                i.Key = key;
+                Archive.MapInfo = i;
                 UpdateList(true, -1);
             }
             Updating = false;
@@ -380,19 +333,14 @@ namespace S5xTool
 
         private void ReplaceImage(string n)
         {
-            Archive.AddFileFromFilesystem(n, ExternalMapMain);
-            BbaFile f = Archive.GetFileByName(ExternalMapMain);
-            Archive.CopyFile(f, ExternalMapMed);
-            Archive.CopyFile(f, ExternalMapLow);
+            Archive.SetMinimapTextureFromFilesystem(n);
         }
 
         private void BtnLoadEx2Bbas_Click(object sender, EventArgs e)
         {
             try
             {
-#pragma warning disable CA1416 // Validate platform compatibility
                 string p = Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Blue Byte\\The Settlers - Heritage of Kings", "InstallPath", null) as string;
-#pragma warning restore CA1416 // Validate platform compatibility
                 if (p == null)
                 {
                     MessageBox.Show("registry not set", "error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -472,11 +420,19 @@ namespace S5xTool
 
         private void ImportFolderMap(BbaArchive a, string path)
         {
-            using FileStream inf = File.OpenRead(path);
-            XDocument doc = XDocument.Load(inf);
+            a.AddFileFromFilesystem(path, BbaArchive.InfoXML);
+            S5MapInfo i = a.MapInfo;
+            if (i == null)
+            {
+                MessageBox.Show("mapinfo seems invalid");
+                UpdateList(false, -1);
+                return;
+            }
+            
+
             string externalmap = "maps\\externalmap\\";
             string folder = Path.GetDirectoryName(path);
-            string mappreview = doc.Root.Element("MiniMapTextureName").Value;
+            string mappreview = i.MiniMapTextureName;
             string maptexturefolder = "maps\\user\\" + Path.GetFileName(folder) + "\\";
             if (mappreview.StartsWith(maptexturefolder))
             {
@@ -497,10 +453,8 @@ namespace S5xTool
             {
                 MessageBox.Show("map preview not found (file does not exist). please add one via Replace Map Image.");
             }
-            doc.Root.Element("MiniMapTextureName").Value = "data\\graphics\\Textures\\GUI\\MapPics\\externalmap";
-            MemoryStream s = new();
-            doc.Save(s);
-            a.AddFileFromMem(s.ToArray(), InfoXML);
+            i.MiniMapTextureName = "data\\graphics\\Textures\\GUI\\MapPics\\externalmap";
+            a.MapInfo = i;
             UpdateList(false, -1);
         }
 
