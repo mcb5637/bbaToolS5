@@ -10,12 +10,12 @@ namespace bbaToolS5
 {
     public static class BbaReader
     {
-        public static BbaArchive ReadBba(string file, BbaArchive ar = null, Func<string, bool> shouldAdd = null, Action<ProgressStatus> prog = null)
+        public static BbaArchive ReadBba(string file, BbaArchive? ar = null, Func<string, bool>? shouldAdd = null, Action<ProgressStatus>? prog = null)
         {
             return ReadBba(file, new FileStream(file, FileMode.Open, FileAccess.Read), ar, shouldAdd, prog);
         }
 
-        public static BbaArchive ReadBba(string file, Stream inp, BbaArchive ar = null, Func<string, bool> shouldAdd = null, Action<ProgressStatus> prog = null)
+        public static BbaArchive ReadBba(string file, Stream inp, BbaArchive? ar = null, Func<string, bool>? shouldAdd = null, Action<ProgressStatus>? prog = null)
         {
             if (ar == null)
                 ar = new BbaArchive();
@@ -118,7 +118,7 @@ namespace bbaToolS5
             {
                 if (shouldAdd(e.Filename))
                 {
-                    BbaFile linked = ar.Contents.Find((f) => f is BbaFileFromArchive fa && fa.FileOffset == e.Offset);
+                    BbaFile? linked = ar.Contents.Find((f) => f is BbaFileFromArchive fa && fa.FileOffset == e.Offset);
                     if (linked != null)
                     {
                         ar.AddFileLink(e.Filename, linked);

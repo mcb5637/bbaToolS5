@@ -9,14 +9,14 @@ namespace bbaToolS5
 {
     public abstract class BbaFile : IComparable<BbaFile>
     {
-        internal static string[] CompressedExt = new string[] { ".xml", ".lua", ".bin", ".fdb", ".fx", ".txt" };
-        internal static string[] NeverCompressExt = new string[] { ".wav", ".mp3" };
+        internal static string[] CompressedExt = [".xml", ".lua", ".bin", ".fdb", ".fx", ".txt"];
+        internal static string[] NeverCompressExt = [".wav", ".mp3"];
 
         public string InternalPath
         {
             get;
             internal set;
-        }
+        } = "";
 
         internal virtual long PosWrittenTo { get; set; }
         internal virtual uint WrittenSize { get; set; }
@@ -27,8 +27,10 @@ namespace bbaToolS5
         public abstract Stream GetStream();
         public abstract byte[] GetBytes();
 
-        public int CompareTo(BbaFile other)
+        public int CompareTo(BbaFile? other)
         {
+            if (other == null)
+                return 1;
             return InternalPath.CompareTo(other.InternalPath);
         }
 

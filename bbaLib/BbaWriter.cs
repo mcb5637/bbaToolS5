@@ -10,13 +10,13 @@ namespace bbaToolS5
 {
     public class BbaWriter
     {
-        public static void WriteBba(BbaArchive a, string file, Action<ProgressStatus> prog = null, bool autoCompression = false)
+        public static void WriteBba(BbaArchive a, string file, Action<ProgressStatus>? prog = null, bool autoCompression = false)
         {
             using FileStream w = new(file, FileMode.Create, FileAccess.Write);
             WriteBba(a, w, prog, autoCompression);
         }
 
-        public static void WriteBba(BbaArchive a, Stream w, Action<ProgressStatus> prog = null, bool autoCompression = false)
+        public static void WriteBba(BbaArchive a, Stream w, Action<ProgressStatus>? prog = null, bool autoCompression = false)
         {
             if (prog == null)
                 prog = (X) => { };
@@ -41,7 +41,7 @@ namespace bbaToolS5
                 {
                     f.PosWrittenTo = w.Position;
                     byte[] file = f.GetBytes();
-                    byte[] compressed = null;
+                    byte[] compressed = [];
                     if ((autoCompression && !f.NeverCompress) || f.ShouldCompess)
                         compressed = ZipTools.CompressBuffer(file);
                     if (autoCompression && !f.NeverCompress) {
@@ -198,6 +198,8 @@ namespace bbaToolS5
         {
             if (e.Type != BbaOutputType.Directory)
             {
+                if (e.FileLink == null)
+                    throw new NullReferenceException("filelink null");
                 e.Offset = (uint)e.FileLink.PosWrittenTo;
                 e.Size = e.FileLink.WrittenSize;
             }
@@ -239,7 +241,7 @@ namespace bbaToolS5
                 foreach (string p in path.Take(path.Length-1))
                 {
                     current = Path.Combine(current, p);
-                    BbaDirStructEntry c2 = c.GetChild(current);
+                    BbaDirStructEntry? c2 = c.GetChild(current);
                     if (c2 == null)
                     {
                         c2 = new BbaDirStructEntry()

@@ -9,9 +9,9 @@ namespace bbaToolS5
 {
     internal class BbaHeader
     {
-        private static readonly byte[] BAFHeaderGlobal = new byte[] { (byte)'B', (byte)'A', (byte)'F' };
-        private static readonly byte[] BAHHeaderGlobal = new byte[] { (byte)'B', (byte)'A', (byte)'H' };
-        private static readonly byte[] BAfHeaderGlobal = new byte[] { (byte)'B', (byte)'A', (byte)'f' };
+        private static readonly byte[] BAFHeaderGlobal = [(byte)'B', (byte)'A', (byte)'F'];
+        private static readonly byte[] BAHHeaderGlobal = [(byte)'B', (byte)'A', (byte)'H'];
+        private static readonly byte[] BAfHeaderGlobal = [(byte)'B', (byte)'A', (byte)'f'];
 
         internal byte[] Header = BAFHeaderGlobal;
         internal byte ArchiveVersion = 2;

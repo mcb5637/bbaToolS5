@@ -9,7 +9,7 @@ namespace bbaToolS5
 {
     internal class BbaFileFromFilesystem : BbaFile
     {
-        internal string SourceFilePath;
+        internal required string SourceFilePath;
 
         public override Stream GetStream()
         {

@@ -9,7 +9,7 @@ namespace bbaToolS5
 {
     internal class SHoK_Crypt
     {
-        private static readonly UInt32[] Key = new UInt32[] { 0x298F599D, 0x67AD005D, 0x2AF91C8D, 0x66433D6D };
+        private static readonly UInt32[] Key = [0x298F599D, 0x67AD005D, 0x2AF91C8D, 0x66433D6D];
         private static readonly UInt32 Delta = 0x61C88647;
 
         private static UInt32 Feistel(UInt32 s, UInt32 v0, UInt32 v1, UInt32 n, UInt32[] k)

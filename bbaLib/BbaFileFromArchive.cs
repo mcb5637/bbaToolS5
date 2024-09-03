@@ -10,14 +10,14 @@ namespace bbaToolS5
 {
     internal class BbaFileFromArchive : BbaFile
     {
-        internal string SourceFilePath;
+        internal required string SourceFilePath;
         internal uint FileOffset;
         internal uint FileLength;
         internal bool IsCompressed;
-        internal string SourceInternalPath;
+        internal required string SourceInternalPath;
 
-        private Stream s;
-        internal Stream ReadFrom
+        private Stream? s;
+        internal Stream? ReadFrom
         {
             get => s;
             set
@@ -47,6 +47,8 @@ namespace bbaToolS5
 
         private byte[] GetDataUncompressed()
         {
+            if (s == null)
+                throw new NullReferenceException("already closed");
             BinaryReader r = new(s);
             r.BaseStream.Seek(FileOffset, SeekOrigin.Begin);
             return r.ReadBytes((int)FileLength);
@@ -54,6 +56,8 @@ namespace bbaToolS5
 
         private byte[] GetDataCompressed()
         {
+            if (s == null)
+                throw new NullReferenceException("already closed");
             BinaryReader r = new(s);
             r.BaseStream.Seek(FileOffset, SeekOrigin.Begin);
             BbaCompresedFileHeader h = new();

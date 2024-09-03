@@ -9,7 +9,7 @@ namespace bbaToolS5
 {
     internal class BbaFileFromMem : BbaFile
     {
-        public byte[] Data;
+        public required byte[] Data;
 
         public override byte[] GetBytes()
         {

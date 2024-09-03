@@ -9,8 +9,8 @@ namespace bbaToolS5
 {
     internal class BbaDirectoryHeader
     {
-        private static readonly byte[] BAdHeaderGlobal = new byte[] { (byte)'B', (byte)'A', (byte)'d' };
-        private static readonly byte[] BAeHeaderGlobal = new byte[] { (byte)'B', (byte)'A', (byte)'e' };
+        private static readonly byte[] BAdHeaderGlobal = [(byte)'B', (byte)'A', (byte)'d'];
+        private static readonly byte[] BAeHeaderGlobal = [(byte)'B', (byte)'A', (byte)'e'];
 
         internal byte[] DirHeader = BAdHeaderGlobal;
         internal byte DirVersion = 2;

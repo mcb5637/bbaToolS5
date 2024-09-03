@@ -5,13 +5,14 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace bbaToolS5
 {
     public class BbaArchive : IEnumerable<BbaFile>
     {
-        internal List<BbaFile> Contents = new();
+        internal List<BbaFile> Contents = [];
 
         public IEnumerator<BbaFile> GetEnumerator()
         {
@@ -25,7 +26,7 @@ namespace bbaToolS5
 
         internal void AddFile(BbaFile f)
         {
-            BbaFile prev = GetFileByName(f.InternalPath);
+            BbaFile? prev = GetFileByName(f.InternalPath);
             if (prev != null)
             {
                 foreach (BbaFile c in Contents)
@@ -59,8 +60,7 @@ namespace bbaToolS5
 
         public void AddFileLink(string path, BbaFile to)
         {
-            if (to == null)
-                throw new ArgumentNullException(nameof(to));
+            ArgumentNullException.ThrowIfNull(to);
             if (!Contents.Contains(to))
                 throw new ArgumentException("to has to be in the archive");
             AddFile(new BbaFileLink()
@@ -72,12 +72,13 @@ namespace bbaToolS5
 
         public void AddFileLink(string path, string original)
         {
-            AddFileLink(path, GetFileByName(original));
+            BbaFile? to = GetFileByName(original) ?? throw new ArgumentException($"{original} does not exist");
+            AddFileLink(path, to);
         }
 
         public void SearchAndLinkDuplicates()
         {
-            Dictionary<BbaFile, BbaFile> duplicates = new();
+            Dictionary<BbaFile, BbaFile> duplicates = [];
             for (int i = 0; i < Contents.Count; i++)
             {
                 if (Contents[i] is BbaFileLink || duplicates.ContainsKey(Contents[i]))
@@ -138,36 +139,36 @@ namespace bbaToolS5
             return path.ToLower().Replace("/", "\\");
         }
 
-        public BbaFile GetFileByName(string name)
+        public BbaFile? GetFileByName(string name)
         {
             name = FixPath(name);
             return Contents.FirstOrDefault((x) => x.InternalPath.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
 
-        public void LoadToMemory(Func<BbaFile, bool> select = null)
+        public void LoadToMemory(Func<BbaFile, bool>? select = null)
         {
             if (select == null)
                 select = (BbaFile f) => true;
-            BbaFile f = get();
+            BbaFile? f = get();
             while (f != null) {
                 AddFileFromMem(f.GetBytes(), f.InternalPath);
                 f = get();
             }
 
-            BbaFile get()
+            BbaFile? get()
             {
                 return Contents.FirstOrDefault((BbaFile fi) => !(fi is BbaFileFromMem || fi is BbaFileLink) && select(fi)); ;
             }
         }
 
-        public void WriteToBba(string file, Action<ProgressStatus> prog = null, bool autoCompression = false)
+        public void WriteToBba(string file, Action<ProgressStatus>? prog = null, bool autoCompression = false)
         {
             file = Path.GetFullPath(file);
             LoadToMemory((BbaFile f) => f is BbaFileFromArchive a && a.SourceFilePath == file);
             BbaWriter.WriteBba(this, file, prog, autoCompression);
         }
 
-        public void ReadBba(string file, Func<string, bool> shouldAdd = null, Action<ProgressStatus> prog = null)
+        public void ReadBba(string file, Func<string, bool>? shouldAdd = null, Action<ProgressStatus>? prog = null)
         {
             file = Path.GetFullPath(file);
             BbaReader.ReadBba(file, this, shouldAdd, prog);
@@ -178,7 +179,7 @@ namespace bbaToolS5
             ReadBba(file, (string x) => x.Equals(internalFile, StringComparison.OrdinalIgnoreCase), null);
         }
 
-        public void WriteToFolder(string folder, Action<ProgressStatus> prog = null)
+        public void WriteToFolder(string folder, Action<ProgressStatus>? prog = null)
         {
             if (prog == null)
                 prog = (X) => { };
@@ -193,7 +194,7 @@ namespace bbaToolS5
             bool remFL = false;
             if (GetFileByName(FileLinksFile) == null)
             {
-                byte[] fl = CreateFileLinks();
+                byte[]? fl = CreateFileLinks();
                 if (fl != null)
                 {
                     remFL = true;
@@ -203,7 +204,7 @@ namespace bbaToolS5
             foreach (BbaFile f in this)
             {
                 string path = Path.Combine(folder, f.InternalPath);
-                Directory.CreateDirectory(Path.GetDirectoryName(path));
+                Directory.CreateDirectory(Path.GetDirectoryName(path) ?? throw new ArgumentException("somehow path got messed up"));
                 using (FileStream w = new(path, FileMode.Create, FileAccess.Write))
                 {
                     using Stream s = f.GetStream();
@@ -220,7 +221,7 @@ namespace bbaToolS5
             }
         }
 
-        public void ReadFromFolder(string folder, Action<ProgressStatus> prog = null, bool ignoreHidden = false, string internalbase = "", Func<string, bool> shouldAdd = null)
+        public void ReadFromFolder(string folder, Action<ProgressStatus>? prog = null, bool ignoreHidden = false, string internalbase = "", Func<string, bool>? shouldAdd = null)
         {
             if (!Directory.Exists(folder))
                 return;
@@ -235,7 +236,7 @@ namespace bbaToolS5
             };
             DirectoryInfo d = new(folder);
             ReadFromFolder(d, internalbase, prog, stat, ignoreHidden, shouldAdd);
-            BbaFile filel = GetFileByName(FileLinksFile);
+            BbaFile? filel = GetFileByName(FileLinksFile);
             if (filel != null)
             {
                 ResolveFileLinks(filel.GetBytes());
@@ -276,14 +277,9 @@ namespace bbaToolS5
             Clear();
         }
 
-        private class FileLink
+        private byte[]? CreateFileLinks()
         {
-            public string From { get; set; }
-            public string To { get; set; }
-        }
-        private byte[] CreateFileLinks()
-        {
-            List<FileLink> l = new();
+            List<FileLink> l = [];
             foreach (BbaFile f in this)
             {
                 if (f is BbaFileLink lf)
@@ -297,15 +293,29 @@ namespace bbaToolS5
             }
             if (l.Count == 0)
                 return null;
-            return JsonSerializer.SerializeToUtf8Bytes(l);
+            return JsonSerializer.SerializeToUtf8Bytes(l, SourceGenerationContext.Default.ListFileLink);
         }
         private void ResolveFileLinks(byte[] links)
         {
-            foreach (FileLink f in JsonSerializer.Deserialize<List<FileLink>>(links))
+            List<FileLink>? l = JsonSerializer.Deserialize(links, SourceGenerationContext.Default.ListFileLink);
+            if (l == null)
+                return;
+            foreach (FileLink f in l)
             {
                 AddFileLink(f.To, f.From);
             }
         }
         private const string FileLinksFile = "FileLinks.json";
+
+    }
+    internal class FileLink
+    {
+        public required string From { get; set; }
+        public required string To { get; set; }
+    }
+    [JsonSourceGenerationOptions(WriteIndented = true)]
+    [JsonSerializable(typeof(List<FileLink>))]
+    internal partial class SourceGenerationContext : JsonSerializerContext
+    {
     }
 }

@@ -31,7 +31,7 @@ namespace bbaToolS5
             internal set;
         }
 
-        public string AdditionalString
+        public string? AdditionalString
         {
             get;
             internal set;

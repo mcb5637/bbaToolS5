@@ -9,9 +9,9 @@ namespace bbaToolS5
 {
     internal class StreamCache
     {
-        private static Dictionary<Stream, int> Cache = new();
+        private static readonly Dictionary<Stream, int> Cache = [];
 
-        internal static void AddRef(Stream s)
+        internal static void AddRef(Stream? s)
         {
             if (s == null)
                 return;
@@ -21,7 +21,7 @@ namespace bbaToolS5
                 Cache[s] = 1;
         }
 
-        internal static void RemoveRef(Stream s)
+        internal static void RemoveRef(Stream? s)
         {
             if (s == null)
                 return;

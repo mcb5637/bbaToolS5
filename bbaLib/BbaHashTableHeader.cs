@@ -9,7 +9,7 @@ namespace bbaToolS5
 {
     internal class BbaHashTableHeader
     {
-        private static readonly byte[] BAhHeaderGlobal = new byte[] { (byte)'B', (byte)'A', (byte)'h' };
+        private static readonly byte[] BAhHeaderGlobal = [(byte)'B', (byte)'A', (byte)'h'];
 
         internal byte[] Header = BAhHeaderGlobal;
         internal byte HeaderVersion = 2;

@@ -10,7 +10,7 @@ namespace bbaToolS5
     // Note: BbaArchive.RemoveFile implementation assumes that BbaFileLink.Remove() is empty
     internal class BbaFileLink : BbaFile
     {
-        public BbaFile Linked { get; internal set; }
+        public required BbaFile Linked { get; internal set; }
 
         internal override long PosWrittenTo { get => Linked.PosWrittenTo; set { throw new NotSupportedException(); } }
         internal override uint WrittenSize { get => Linked.WrittenSize; set { throw new NotSupportedException(); } }

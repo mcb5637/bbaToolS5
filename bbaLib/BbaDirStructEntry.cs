@@ -17,11 +17,11 @@ namespace bbaToolS5
         internal Int32 FirstChild = -1;
         internal Int32 NextSibling = -1;
         internal UInt64 Timestamp;
-        internal string Filename;
+        internal string Filename = "";
 
-        internal BbaDirStructEntry FirstChildLink;
-        internal BbaDirStructEntry NextSiblingLink;
-        internal BbaFile FileLink;
+        internal BbaDirStructEntry? FirstChildLink;
+        internal BbaDirStructEntry? NextSiblingLink;
+        internal BbaFile? FileLink;
         internal uint OwnOffset;
 
         internal void WriteOffsets(BinaryWriter f)
@@ -86,7 +86,7 @@ namespace bbaToolS5
             FirstChildLink = a;
         }
 
-        internal BbaDirStructEntry GetSibling(string name)
+        internal BbaDirStructEntry? GetSibling(string name)
         {
             if (name.Equals(Filename))
                 return this;
@@ -95,7 +95,7 @@ namespace bbaToolS5
             return null;
         }
 
-        internal BbaDirStructEntry GetChild(string name)
+        internal BbaDirStructEntry? GetChild(string name)
         {
             if (FirstChildLink != null)
                 return FirstChildLink.GetSibling(name);
