@@ -1,18 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <OutputType>Exe</OutputType>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-    <Platforms>x86</Platforms>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
     <Version>1.4.1</Version>
     <Authors>mcb</Authors>
     <Copyright>Copyright © mcb 2022</Copyright>
     <Description>command line tool to read/write SHoK bba/s5x archives</Description>
+    <Platforms>AnyCPU;x64;x86</Platforms>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="DotNetZip" Version="1.16.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\bbaLib\bbaLib.csproj" />
   </ItemGroup>
 </Project>

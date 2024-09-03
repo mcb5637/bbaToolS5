@@ -1,21 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net7.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
     <OutputType>WinExe</OutputType>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <UseWindowsForms>true</UseWindowsForms>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
-    <Platforms>x86</Platforms>
     <Version>1.4.1</Version>
     <Authors>mcb</Authors>
     <Description>GUI tool to read and write SHoK bba/s5x archives</Description>
     <Copyright>Copyright © mcb 2022</Copyright>
+    <Platforms>AnyCPU;x64;x86</Platforms>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="LuaSharp\LuaState51.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\bbaToolS5\bbaToolS5.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="lua50\bin2c50.exe" />
@@ -32,5 +29,8 @@
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
     <PackageReference Include="Microsoft.Windows.Compatibility" Version="7.0.5" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\bbaLib\bbaLib.csproj" />
   </ItemGroup>
 </Project>
