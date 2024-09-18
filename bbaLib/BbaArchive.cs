@@ -11,7 +11,7 @@ using System.Xml.Serialization;
 
 namespace bbaLib
 {
-    public class BbaArchive : IEnumerable<BbaFile>
+    public class BbaArchive : IEnumerable<BbaFile>, IDisposable
     {
         public const string InfoXML = "maps\\externalmap\\info.xml";
         public const string ExternalMapMain = "graphics\\textures\\gui\\mappics\\externalmap.png";
@@ -285,6 +285,11 @@ namespace bbaLib
         }
 
         ~BbaArchive()
+        {
+            Clear();
+        }
+
+        public void Dispose()
         {
             Clear();
         }
