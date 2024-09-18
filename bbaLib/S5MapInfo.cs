@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Schema;
 using System.Xml.Serialization;
 
 namespace bbaLib
@@ -16,8 +17,16 @@ namespace bbaLib
         public int MPPlayerCount;
         public int MPGameOptionFlagSet;
         public string MiniMapTextureName = "";
-        public int Key;
+        [XmlElement]
+        public int[] Key = [];
         public InfoGUID GUID;
+        [XmlAttribute("noNamespaceSchemaLocation", Namespace = XmlSchema.InstanceNamespace)]
+        public string Schema
+        {
+            get => "https://raw.githubusercontent.com/mcb5637/s5xmlschema/master/info.xsd";
+            set { }
+        }
+            
 
         public struct InfoGUID
         {
@@ -26,6 +35,28 @@ namespace bbaLib
             public InfoGUID()
             {
             }
+        }
+    }
+
+    [XmlRoot("root")]
+    public class S5ModPackInfo
+    {
+        public string LoaderPath = "";
+        public string ScriptPath = "";
+        public string Version = "";
+        [XmlElement]
+        public string[] Required = [];
+        [XmlElement]
+        public string[] Incompatible = [];
+        [XmlElement]
+        public string[] Override = [];
+        public bool DataMod = false, ScriptMod = false, MainmenuMod = false, KeepArchive = false, UserRequestable = false;
+        public string? UpdateURL, VersionURL;
+        [XmlAttribute("noNamespaceSchemaLocation", Namespace = XmlSchema.InstanceNamespace)]
+        public string Schema
+        {
+            get => "https://raw.githubusercontent.com/mcb5637/s5xmlschema/master/modpack.xsd";
+            set { }
         }
     }
 }

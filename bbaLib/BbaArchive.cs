@@ -369,6 +369,38 @@ namespace bbaLib
             SetMinimapTextureLinks(f);
             return f;
         }
+
+        private static string ModPackXml(string modname)
+        {
+            return $"modpack/{modname}/modpack.xml";
+        }
+        public S5ModPackInfo? GetModPackInfo(string modname)
+        {
+            BbaFile? f = GetFileByName(ModPackXml(modname));
+            if (f == null)
+                return null;
+            using Stream s = f.GetStream();
+            try
+            {
+                return new XmlSerializer(typeof(S5ModPackInfo)).Deserialize(s) as S5ModPackInfo;
+            }
+            catch (InvalidOperationException)
+            {
+                return null;
+            }
+        }
+        public void SetModPackInfo(string modname, S5ModPackInfo i)
+        {
+            string n = ModPackXml(modname);
+            if (i == null)
+            {
+                RemoveFile(n);
+                return;
+            }
+            using MemoryStream s = new();
+            new XmlSerializer(typeof(S5MapInfo)).Serialize(s, i);
+            AddFileFromMem(s.GetBuffer(), n);
+        }
     }
     internal class FileLink
     {

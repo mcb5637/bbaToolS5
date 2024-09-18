@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
 
+#pragma warning disable CA1416 // Validate platform compatibility
 namespace S5xTool
 {
     public partial class S5xToolGUI : Form
@@ -46,7 +47,7 @@ namespace S5xTool
                     ComboBox_MPType.SelectedIndex = inf.MPPlayerCount;
                 else
                     ComboBox_MPType.SelectedIndex = 0;
-                ComboBox_Key.SelectedIndex = inf.Key;
+                ComboBox_Key.SelectedIndex = inf.Key.FirstOrDefault();
             }
             else
             {
@@ -304,7 +305,7 @@ namespace S5xTool
             S5MapInfo i = Archive.MapInfo;
             if (i != null)
             {
-                i.Key = key;
+                i.Key = [key];
                 Archive.MapInfo = i;
                 UpdateList(true, -1);
             }
@@ -597,14 +598,12 @@ namespace S5xTool
                 return 0;
             });
             L.SetTable(L.GLOBALSINDEX);
-#pragma warning disable CA1416 // Validate platform compatibility
             if (Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Blue Byte\\The Settlers - Heritage of Kings", "InstallPath", null) is string r)
             {
                 L.Push("S5InstallPath");
                 L.Push(r);
                 L.SetTable(L.GLOBALSINDEX);
             }
-#pragma warning restore CA1416 // Validate platform compatibility
             L.Push("ExternalmapPath");
             L.NewTable();
             L.Push("Path");
@@ -658,3 +657,4 @@ namespace S5xTool
         }
     }
 }
+#pragma warning restore CA1416 // Validate platform compatibility
