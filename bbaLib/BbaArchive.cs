@@ -375,7 +375,7 @@ namespace bbaLib
             return f;
         }
 
-        private static string ModPackXml(string modname)
+        public static string ModPackXml(string modname)
         {
             return $"modpack/{modname}/modpack.xml";
         }

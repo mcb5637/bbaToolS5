@@ -20,6 +20,7 @@ namespace bbaLib
         [XmlElement]
         public int[] Key = [];
         public InfoGUID GUID;
+        public string? UpdateURL, VersionURL;
         [XmlAttribute("noNamespaceSchemaLocation", Namespace = XmlSchema.InstanceNamespace)]
         public string Schema
         {
