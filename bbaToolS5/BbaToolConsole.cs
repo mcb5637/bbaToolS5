@@ -68,7 +68,7 @@ namespace bbaToolS5
                         throw new IOException($"{p} does not exist");
                     }
                 }
-                BbaArchive a = new();
+                using BbaArchive a = new();
                 foreach (string fi in files)
                 {
                     string f = Path.GetFullPath(fi);
@@ -101,7 +101,6 @@ namespace bbaToolS5
                     Console.WriteLine($"writing to folder {output}");
                     a.WriteToFolder(output, ProgressReport);
                 }
-                a.Clear();
             }
             catch (Exception e)
             {
