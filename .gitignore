@@ -339,3 +339,5 @@ ASALocalRun/
 # BeatPulse healthcheck temp database
 healthchecksdb
 /bbaToolS5/Properties/launchSettings.json
+/publish.zip
+/publish_lib
