@@ -17,6 +17,7 @@ namespace bbaToolS5
             bool autoCompression = false;
             bool searchDups = false;
             List<string> files = [];
+            bool? over = null;
 
             foreach (string f in args)
             {
@@ -28,6 +29,10 @@ namespace bbaToolS5
                     autoCompression = true;
                 else if ("-searchDuplicates".Equals(f))
                     searchDups = true;
+                else if ("-override".Equals(f))
+                    over = true;
+                else if ("-add".Equals(f))
+                    over = false;
                 else
                     files.Add(f.TrimEnd('\\', '/'));
             }
@@ -94,12 +99,12 @@ namespace bbaToolS5
                     if (searchDups)
                         a.SearchAndLinkDuplicates();
                     Console.WriteLine($"writing to archive {output}");
-                    a.WriteToBba(output, ProgressReport, autoCompression);
+                    a.WriteToBba(output, ProgressReport, autoCompression, OverrideConfirm);
                 }
                 else
                 {
                     Console.WriteLine($"writing to folder {output}");
-                    a.WriteToFolder(output, ProgressReport);
+                    a.WriteToFolder(output, ProgressReport, OverrideConfirm);
                 }
             }
             catch (Exception e)
@@ -117,6 +122,24 @@ namespace bbaToolS5
                 Environment.Exit(0);
             Console.WriteLine("done. press any key to close this window.");
             Console.ReadKey();
+
+
+            bool? OverrideConfirm(string p)
+            {
+                if (over != null)
+                    return over;
+                Console.WriteLine($"override {p}? (Y)es, (N)o (add to existing, replacing if already exists), Cancel (anything else)");
+                string? l = Console.ReadLine();
+                if (l == null)
+                    return null;
+                else if (l.Equals("y", StringComparison.CurrentCultureIgnoreCase))
+                    return true;
+                else if (l.Equals("n", StringComparison.CurrentCultureIgnoreCase))
+                    return false;
+                else
+                    return null;
+            }
+
         }
 
         private static void ProgressReport(ProgressStatus x)

@@ -47,7 +47,10 @@ namespace S5xTool
         {
             try
             {
-                A.WriteToBba(l.ToString(2), null, l.OptBool(3, false));
+                bool? o = null;
+                if (l!.IsNoneOrNil(4))
+                    o = l.CheckBool(4);
+                A.WriteToBba(l.ToString(2), null, l.OptBool(3, false), (x) => o);
             }
             catch (IOException e)
             {
@@ -60,7 +63,10 @@ namespace S5xTool
         {
             try
             {
-                A.WriteToFolder(l.ToString(2));
+                bool? o = null;
+                if (l!.IsNoneOrNil(3))
+                    o = l.CheckBool(3);
+                A.WriteToFolder(l.ToString(2), null, (x) => o);
             }
             catch (IOException e)
             {

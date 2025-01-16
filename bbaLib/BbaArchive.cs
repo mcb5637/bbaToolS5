@@ -173,11 +173,34 @@ namespace bbaLib
             }
         }
 
-        public void WriteToBba(string file, Action<ProgressStatus>? prog = null, bool autoCompression = false)
+        public void WriteToBba(string file, Action<ProgressStatus>? prog, bool autoCompression, Func<string, bool?>? over)
         {
+            if (over == null)
+                over = (X) => false;
             file = Path.GetFullPath(file);
-            LoadToMemory((BbaFile f) => f is BbaFileFromArchive a && a.SourceFilePath == file);
+            if (File.Exists(file))
+            {
+                bool? o = over(file);
+                if (o == true)
+                {
+                    LoadToMem();
+                }
+                else if (o == false)
+                {
+                    ReadBba(file, (i) => GetFileByName(i) == null, null);
+                    LoadToMem();
+                }
+                else
+                {
+                    return;
+                }
+            }
             BbaWriter.WriteBba(this, file, prog, autoCompression);
+
+            void LoadToMem()
+            {
+                LoadToMemory((BbaFile f) => f is BbaFileFromArchive a && a.SourceFilePath == file);
+            }
         }
 
         public void ReadBba(string file, Func<string, bool>? shouldAdd = null, Action<ProgressStatus>? prog = null)
@@ -191,12 +214,20 @@ namespace bbaLib
             ReadBba(file, (string x) => x.Equals(internalFile, StringComparison.OrdinalIgnoreCase), null);
         }
 
-        public void WriteToFolder(string folder, Action<ProgressStatus>? prog = null)
+        public void WriteToFolder(string folder, Action<ProgressStatus>? prog, Func<string, bool?>? over)
         {
             if (prog == null)
                 prog = (X) => { };
+            if (over == null)
+                over = (X) => false;
             if (Directory.Exists(folder))
-                Directory.Delete(folder, true);
+            {
+                bool? o = over(folder);
+                if (o == true)
+                    Directory.Delete(folder, true);
+                else if (o == null)
+                    return;
+            }
             int total = Contents.Count;
             int current = 0;
             ProgressStatus stat = new()

@@ -18,7 +18,6 @@ namespace S5xTool
 {
     public partial class S5xToolGUI : Form
     {
-        private const string InfoXML = "maps\\externalmap\\info.xml";
         private BbaArchive Archive;
         private bool Updating = false;
         private readonly FilePeek peek = new();
@@ -209,7 +208,7 @@ namespace S5xTool
                     BtnRandomGUID_Click(null, null);
                 try
                 {
-                    Archive.WriteToBba(Dlg_Save.FileName, null, CB_AutoCompression.Checked);
+                    Archive.WriteToBba(Dlg_Save.FileName, null, CB_AutoCompression.Checked, OverridePopup);
                 }
                 catch (Exception ex)
                 {
@@ -392,12 +391,29 @@ namespace S5xTool
             {
                 try
                 {
-                    Archive.WriteToFolder(Dlg_Folder.SelectedPath);
+                    Archive.WriteToFolder(Dlg_Folder.SelectedPath, null, OverridePopup);
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.ToString());
                 }
+            }
+        }
+
+        private static bool? OverridePopup(string p)
+        {
+            DialogResult r = MessageBox.Show($"override {p}?\nNo will still override files, if they exist in the archive and target", "", MessageBoxButtons.YesNoCancel);
+            if (r == DialogResult.Yes)
+            {
+                return true;
+            }
+            else if (r == DialogResult.No)
+            {
+                return false;
+            }
+            else
+            {
+                return null;
             }
         }
 
