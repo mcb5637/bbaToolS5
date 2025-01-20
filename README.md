@@ -29,6 +29,12 @@ Can reduce archive size, especially if used with textures.
 GUI Tool to view and modify Settlers 5 HoK archive files (.bba / .s5x).
 Also includes automated common tasks like script processing, preview image replacement and folder to s5x map conversion.
 
+Default way to load mcbPacker to your mapscript:
+```lua
+Script.Load("data\\maps\\user\\s5CommunityLib\\packer\\devLoad.lua") --mcbPacker.ignore
+mcbPacker.Paths = {{"data/maps/user/EMS/tools/", ".lua"}} --mcbPacker.ignore
+--mcbPacker.addLoader
+```
 
 Included lua tools:
 - http://www.lua.org/
