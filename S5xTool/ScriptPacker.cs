@@ -97,14 +97,20 @@ namespace S5xTool
             bool compile, LuaState l, ref string log)
         {
             LinkedList<string> def = new();
+            LinkedList<string> loaded = new();
             if (copy)
                 def.AddLast("CopyToOneFile");
             if (compile)
                 def.AddLast("Compile");
+            if (addloader)
+                def.AddLast("AddLoader");
+            else
+                def.AddLast("NoLoader");
             string of = oufile;
             if (of == "mapscript" && addloader)
             {
                 of = "mapscript_packed";
+                infile = "mapscript_packed";
                 MemoryStream ms = new();
                 StreamWriter wr = new(ms);
                 wr.WriteLine("-- Warning: Map script and additional map data is included as extra files in this archive. Do not save this map file from editor!");
@@ -115,15 +121,27 @@ namespace S5xTool
                 }
                 else
                 {
-                    ProcessSingleFile(a, "s5CommunityLib/packer/devLoad", "s5CommunityLib/packer/devLoad", paths, isarch, new LinkedList<string>(), def, copy, null, compile, l, ref log);
-                    wr.WriteLine($"Script.Load(\"data/maps/externalmap/s5CommunityLib/packer/devLoad.lua{(compile ? "c" : "")}\")");
-                    wr.WriteLine($"mcbPacker.Paths = {{\"data/maps/externalmap/\", \".lua{(compile ? "c" : "")}\"}}");
+                    log = WriteLoader(a, paths, isarch, loaded, def, copy, compile, l, ref log, wr);
                     wr.WriteLine("mcbPacker.require(\"mapscript_packed\")");
                 }
                 wr.Flush();
+                a.RenameFile("maps\\externalmap\\mapscript.lua", "maps\\externalmap\\mapscript_packed.lua");
                 a.AddFileFromMem(ms.ToArray(), "maps/externalmap/mapscript.lua");
             }
-            ProcessSingleFile(a, of, infile, paths, isarch, new LinkedList<string>(), def, copy, null, compile, l, ref log);
+            procFile(of, infile, ref log);
+
+            void procFile(string o, string i, ref string lo)
+            {
+                ProcessSingleFile(a, o, i, paths, isarch, loaded, def, copy, null, compile, l, ref lo);
+            }
+        }
+
+        private static string WriteLoader(BbaArchive a, string[] paths, bool[] isarch, LinkedList<string> loaded, LinkedList<string> def, bool copy, bool compile, LuaState l, ref string log, StreamWriter wr)
+        {
+            ProcessSingleFile(a, "s5CommunityLib/packer/devLoad", "s5CommunityLib/packer/devLoad", paths, isarch, loaded, def, copy, null, compile, l, ref log);
+            wr.WriteLine($"Script.Load(\"data/maps/externalmap/s5CommunityLib/packer/devLoad.lua{(compile ? "c" : "")}\")");
+            wr.WriteLine($"mcbPacker.Paths = {{{{\"data/maps/externalmap/\", \".lua{(compile ? "c" : "")}\"}}}}");
+            return log;
         }
 
         private static void ProcessSingleFile(BbaArchive a, string oufile, string infile, string[] paths, bool[] isarch,
@@ -151,7 +169,7 @@ namespace S5xTool
                     Match uncomment = Regex.Match(line, "^\\s*\\-\\-mcbPacker\\.uncomment\\s(?<f>.+)$");
                     Match def = Regex.Match(line, "^\\s*\\-\\-mcbPacker\\.define:(?<f>\\w+)$");
                     Match udef = Regex.Match(line, "^\\s*\\-\\-mcbPacker\\.undefine:(?<f>\\w+)$");
-                    Match uncifdef = Regex.Match(line, "^\\s*\\-\\-mcbPacker\\.uncommentIfDef:(?<def>\\w+) (?<lin>.+)$");
+                    Match uncifdef = Regex.Match(line, "^\\s*\\-\\-mcbPacker\\.uncommentIfDef:(?<def>\\w+)\\s(?<lin>.+)$");
                     Match igifdef = Regex.Match(line, "\\-\\-mcbPacker\\.ignoreIfDef:(?<def>\\w+)$");
                     Match returnifdef = Regex.Match(line, "^\\s*\\-\\-mcbPacker\\.returnIfDef:(?<def>\\w+)$");
                     Match logstr = Regex.Match(line, "^\\s*\\-\\-mcbPacker\\.log (?<f>.+)$");
@@ -242,6 +260,12 @@ namespace S5xTool
                     else if (logstr.Success)
                     {
                         log += $"Info: log {logstr.Groups["f"].Value} from {infile}\n";
+                    }
+                    else if (Regex.Match(line, "^\\-\\-mcbPacker\\.addLoader").Success)
+                    {
+                        writeline = false;
+                        if (defines.Contains("NoLoader"))
+                            WriteLoader(a, paths, isarch, loaded, defines, copytogether, compile, l, ref log, wr);
                     }
 
                     if (writeline)
