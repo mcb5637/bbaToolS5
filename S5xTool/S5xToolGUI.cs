@@ -326,14 +326,9 @@ namespace S5xTool
             Dlg_Open.FilterIndex = 4;
             if (Dlg_Open.ShowDialog() == DialogResult.OK)
             {
-                ReplaceImage(Dlg_Open.FileName);
+                Archive.SetMinimapTextureFromFilesystem(Dlg_Open.FileName);
                 UpdateList(false, -1);
             }
-        }
-
-        private void ReplaceImage(string n)
-        {
-            Archive.SetMinimapTextureFromFilesystem(n);
         }
 
         private void BtnLoadEx2Bbas_Click(object sender, EventArgs e)
@@ -437,41 +432,7 @@ namespace S5xTool
 
         private void ImportFolderMap(BbaArchive a, string path)
         {
-            a.AddFileFromFilesystem(path, BbaArchive.InfoXML);
-            S5MapInfo i = a.MapInfo;
-            if (i == null)
-            {
-                MessageBox.Show("mapinfo seems invalid");
-                UpdateList(false, -1);
-                return;
-            }
-            
-
-            string externalmap = "maps\\externalmap\\";
-            string folder = Path.GetDirectoryName(path);
-            string mappreview = i.MiniMapTextureName;
-            string maptexturefolder = "maps\\user\\" + Path.GetFileName(folder) + "\\";
-            if (mappreview.StartsWith(maptexturefolder))
-            {
-                mappreview = mappreview.Replace(maptexturefolder, "");
-                mappreview = Path.Combine(folder, mappreview);
-                mappreview = Path.ChangeExtension(mappreview, "png");
-            }
-            else
-            {
-                MessageBox.Show("map preview not found (the path in the info.xml is invalid). please add one via Replace Map Image.");
-            }
-            a.ReadFromFolder(folder, null, true, externalmap, (n) => n != mappreview && n != path);
-            if (File.Exists(mappreview))
-            {
-                ReplaceImage(mappreview);
-            }
-            else
-            {
-                MessageBox.Show("map preview not found (file does not exist). please add one via Replace Map Image.");
-            }
-            i.MiniMapTextureName = "data\\graphics\\Textures\\GUI\\MapPics\\externalmap";
-            a.MapInfo = i;
+            a.ImportFolderMap(path, m => MessageBox.Show(m));
             UpdateList(false, -1);
         }
 

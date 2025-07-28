@@ -13,6 +13,7 @@ namespace bbaLib
 {
     public class BbaArchive : IEnumerable<BbaFile>, IDisposable
     {
+        public const string ExternalMapFolder = "maps\\externalmap";
         public const string InfoXML = "maps\\externalmap\\info.xml";
         public const string ExternalMapMain = "graphics\\textures\\gui\\mappics\\externalmap.png";
         public const string ExternalMapLow = "graphics\\textureslow\\gui\\mappics\\externalmap.png";
@@ -437,6 +438,51 @@ namespace bbaLib
             using MemoryStream s = new();
             new XmlSerializer(typeof(S5MapInfo)).Serialize(s, i);
             AddFileFromMem(s.GetBuffer(), n);
+        }
+
+        public bool ImportFolderMap(string path, Action<string>? msgHandler = null)
+        {
+            if (msgHandler == null)
+                msgHandler = x => { };
+
+            AddFileFromFilesystem(path, InfoXML);
+            S5MapInfo? i = MapInfo;
+            if (i == null)
+            {
+                msgHandler("mapinfo seems invalid");
+                return false;
+            }
+
+            string? folder = Path.GetDirectoryName(path);
+            if (folder == null)
+            {
+                msgHandler("folder of path is null?");
+                return false;
+            }
+            string mappreview = i.MiniMapTextureName;
+            string maptexturefolder = "maps\\user\\" + Path.GetFileName(folder) + "\\";
+            if (mappreview.StartsWith(maptexturefolder))
+            {
+                mappreview = mappreview.Replace(maptexturefolder, "");
+                mappreview = Path.Combine(folder, mappreview);
+                mappreview = Path.ChangeExtension(mappreview, "png");
+            }
+            else
+            {
+                msgHandler("map preview not found (the path in the info.xml is invalid). please add one via Replace Map Image.");
+            }
+            ReadFromFolder(folder, null, true, ExternalMapFolder, (n) => n != mappreview && n != path);
+            if (File.Exists(mappreview))
+            {
+                SetMinimapTextureFromFilesystem(mappreview);
+            }
+            else
+            {
+                msgHandler("map preview not found (file does not exist). please add one via Replace Map Image.");
+            }
+            i.MiniMapTextureName = "data\\graphics\\Textures\\GUI\\MapPics\\externalmap";
+            MapInfo = i;
+            return true;
         }
     }
     internal class FileLink
