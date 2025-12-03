@@ -101,7 +101,8 @@ namespace bbaLib
             status.Step = ProgressStatusStep.ReadBba_FileCatalog;
 
             int processedFiles = 0;
-            BbaDirStructEntry e = ProcessDirStructEntry(ar, r2, hashentry.DirOffset, file, inp, shouldAdd, prog, numFiles, ref processedFiles, status);
+            List<BbaFileFromArchive> loaded = new();
+            BbaDirStructEntry e = ProcessDirStructEntry(ar, r2, hashentry.DirOffset, file, inp, shouldAdd, prog, numFiles, ref processedFiles, status, loaded);
             if (!e.Filename.Equals("."))
                 throw new IOException("hashtable not pointing to root");
 
@@ -111,21 +112,21 @@ namespace bbaLib
         }
 
         private static BbaDirStructEntry ProcessDirStructEntry(BbaArchive ar, BinaryReader r2, long offset, string file, Stream inp, Func<string, bool> shouldAdd,
-            Action<ProgressStatus> prog, int numFiles, ref int processed, ProgressStatus status)
+            Action<ProgressStatus> prog, int numFiles, ref int processed, ProgressStatus status, List<BbaFileFromArchive> loaded)
         {
             BbaDirStructEntry e = ReadDirStructEntry(r2, offset);
             if (e.Type != BbaOutputType.Directory)
             {
                 if (shouldAdd(e.Filename))
                 {
-                    BbaFile? linked = ar.Contents.Find((f) => f is BbaFileFromArchive fa && fa.FileOffset == e.Offset);
+                    BbaFile? linked = loaded.Find((fa) => fa.FileOffset == e.Offset);
                     if (linked != null)
                     {
                         ar.AddFileLink(e.Filename, linked);
                     }
                     else
                     {
-                        ar.AddFile(new BbaFileFromArchive()
+                        BbaFileFromArchive f = new()
                         {
                             InternalPath = e.Filename,
                             SourceFilePath = file,
@@ -134,7 +135,9 @@ namespace bbaLib
                             IsCompressed = e.Type == BbaOutputType.Compressed,
                             SourceInternalPath = e.Filename,
                             ReadFrom = inp
-                        });
+                        };
+                        ar.AddFile(f);
+                        loaded.Add(f);
                     }
                     status.AdditionalString = e.Filename;
                     status.Progress = processed * 100 / numFiles;
@@ -145,11 +148,11 @@ namespace bbaLib
             else if (e.FirstChild != -1)
             {
                 processed++;
-                ProcessDirStructEntry(ar, r2, e.FirstChild, file, inp, shouldAdd, prog, numFiles, ref processed, status);
+                ProcessDirStructEntry(ar, r2, e.FirstChild, file, inp, shouldAdd, prog, numFiles, ref processed, status, loaded);
             }
             if (e.NextSibling != -1)
             {
-                ProcessDirStructEntry(ar, r2, e.NextSibling, file, inp, shouldAdd, prog, numFiles, ref processed, status);
+                ProcessDirStructEntry(ar, r2, e.NextSibling, file, inp, shouldAdd, prog, numFiles, ref processed, status, loaded);
             }
             return e;
         }
