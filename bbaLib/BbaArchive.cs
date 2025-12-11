@@ -149,7 +149,7 @@ namespace bbaLib
 
         private static string FixPath(string path)
         {
-            return path.ToLower().Replace("/", "\\");
+            return path.ToLower().Replace('/', '\\');
         }
 
         public BbaFile? GetFileByName(string name)
@@ -248,7 +248,7 @@ namespace bbaLib
             foreach (BbaFile f in this)
             {
                 string path = Path.Combine(folder, f.InternalPath);
-                path = path.Replace("\\", Path.DirectorySeparatorChar.ToString());
+                path = path.Replace('\\', Path.DirectorySeparatorChar);
                 Directory.CreateDirectory(Path.GetDirectoryName(path) ?? throw new ArgumentException("somehow path got messed up"));
                 using (FileStream w = new(path, FileMode.Create, FileAccess.Write))
                 {

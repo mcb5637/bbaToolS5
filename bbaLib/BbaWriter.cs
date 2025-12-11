@@ -240,7 +240,7 @@ namespace bbaLib
                 string current = "";
                 foreach (string p in path.Take(path.Length-1))
                 {
-                    current = Path.Combine(current, p);
+                    current = string.IsNullOrEmpty(current) ? p : $"{current}\\{p}";
                     BbaDirStructEntry? c2 = c.GetChild(current);
                     if (c2 == null)
                     {
