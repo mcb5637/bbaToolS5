@@ -1,19 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace bbaLib
+﻿namespace bbaLib
 {
     // Note: BbaArchive.RemoveFile implementation assumes that BbaFileLink.Remove() is empty
     internal class BbaFileLink : BbaFile
     {
         public required BbaFile Linked { get; internal set; }
 
-        internal override long PosWrittenTo { get => Linked.PosWrittenTo; set { throw new NotSupportedException(); } }
-        internal override uint WrittenSize { get => Linked.WrittenSize; set { throw new NotSupportedException(); } }
+        internal override long PosWrittenTo { get => Linked.PosWrittenTo; set => throw new NotSupportedException();
+        }
+        internal override uint WrittenSize { get => Linked.WrittenSize; set => throw new NotSupportedException();
+        }
         public override bool ShouldCompess { get => Linked.ShouldCompess; set => Linked.ShouldCompess = value; }
 
         public override byte[] GetBytes()

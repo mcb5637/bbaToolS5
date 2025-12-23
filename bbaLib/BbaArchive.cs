@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.Collections;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace bbaLib
@@ -19,7 +13,7 @@ namespace bbaLib
         public const string ExternalMapLow = "graphics\\textureslow\\gui\\mappics\\externalmap.png";
         public const string ExternalMapMed = "graphics\\texturesmed\\gui\\mappics\\externalmap.png";
 
-        internal List<BbaFile> Contents = [];
+        internal readonly List<BbaFile> Contents = [];
 
         public IEnumerator<BbaFile> GetEnumerator()
         {
@@ -85,7 +79,7 @@ namespace bbaLib
 
         public void AddFileLink(string path, string original)
         {
-            BbaFile? to = GetFileByName(original) ?? throw new ArgumentException($"{original} does not exist");
+            BbaFile to = GetFileByName(original) ?? throw new ArgumentException($"{original} does not exist");
             AddFileLink(path, to);
         }
 
@@ -115,7 +109,7 @@ namespace bbaLib
             int i = Contents.FindIndex((x) => x.InternalPath.Equals(intName, StringComparison.OrdinalIgnoreCase));
             if (i >= 0)
             {
-                Contents.RemoveAll((BbaFile c) => c is BbaFileLink fl && fl.Linked == Contents[i]);
+                Contents.RemoveAll((c) => c is BbaFileLink fl && fl.Linked == Contents[i]);
 
                 Contents[i].Remove();
                 Contents.RemoveAt(i);
@@ -161,23 +155,25 @@ namespace bbaLib
         public void LoadToMemory(Func<BbaFile, bool>? select = null)
         {
             if (select == null)
-                select = (BbaFile f) => true;
-            BbaFile? f = get();
+                select = (_) => true;
+            BbaFile? f = Get();
             while (f != null) {
                 AddFileFromMem(f.GetBytes(), f.InternalPath);
-                f = get();
+                f = Get();
             }
 
-            BbaFile? get()
+            return;
+
+            BbaFile? Get()
             {
-                return Contents.FirstOrDefault((BbaFile fi) => !(fi is BbaFileFromMem || fi is BbaFileLink) && select(fi)); ;
+                return Contents.FirstOrDefault((fi) => !(fi is BbaFileFromMem or BbaFileLink) && select(fi));
             }
         }
 
         public void WriteToBba(string file, Action<ProgressStatus>? prog, bool autoCompression, Func<string, bool?>? over)
         {
             if (over == null)
-                over = (X) => false;
+                over = (_) => false;
             file = Path.GetFullPath(file);
             if (File.Exists(file))
             {
@@ -200,7 +196,7 @@ namespace bbaLib
 
             void LoadToMem()
             {
-                LoadToMemory((BbaFile f) => f is BbaFileFromArchive a && a.SourceFilePath == file);
+                LoadToMemory((f) => f is BbaFileFromArchive a && a.SourceFilePath == file);
             }
         }
 
@@ -212,15 +208,15 @@ namespace bbaLib
 
         public void ReadBba(string file, string internalFile)
         {
-            ReadBba(file, (string x) => x.Equals(internalFile, StringComparison.OrdinalIgnoreCase), null);
+            ReadBba(file, (x) => x.Equals(internalFile, StringComparison.OrdinalIgnoreCase), null);
         }
 
         public void WriteToFolder(string folder, Action<ProgressStatus>? prog, Func<string, bool?>? over)
         {
             if (prog == null)
-                prog = (X) => { };
+                prog = (_) => { };
             if (over == null)
-                over = (X) => false;
+                over = (_) => false;
             if (Directory.Exists(folder))
             {
                 bool? o = over(folder);
@@ -233,15 +229,15 @@ namespace bbaLib
             int current = 0;
             ProgressStatus stat = new()
             {
-                Step = ProgressStatusStep.WriteFolder_File
+                Step = ProgressStatusStep.WriteFolderFile
             };
-            bool remFL = false;
+            bool removeLink = false;
             if (GetFileByName(FileLinksFile) == null)
             {
                 byte[]? fl = CreateFileLinks();
                 if (fl != null)
                 {
-                    remFL = true;
+                    removeLink = true;
                     AddFileFromMem(fl, FileLinksFile);
                 }
             }
@@ -260,7 +256,7 @@ namespace bbaLib
                 stat.AdditionalString = f.InternalPath;
                 prog(stat);
             }
-            if (remFL)
+            if (removeLink)
             {
                 RemoveFile(FileLinksFile);
             }
@@ -271,12 +267,12 @@ namespace bbaLib
             if (!Directory.Exists(folder))
                 return;
             if (prog == null)
-                prog = (X) => { };
+                prog = (_) => { };
             if (shouldAdd == null)
-                shouldAdd = (x) => true;
+                shouldAdd = (_) => true;
             ProgressStatus stat = new()
             {
-                Step = ProgressStatusStep.ReadFolder_File,
+                Step = ProgressStatusStep.ReadFolderFile,
                 Progress = 0
             };
             DirectoryInfo d = new(folder);
@@ -386,10 +382,8 @@ namespace bbaLib
                 AddFileFromMem(s.GetBuffer(), InfoXML);
             }
         }
-        public Stream? MinimapTexture
-        {
-            get => GetFileByName(ExternalMapMain)?.GetStream();
-        }
+        public Stream? MinimapTexture => GetFileByName(ExternalMapMain)?.GetStream();
+
         private void SetMinimapTextureLinks(BbaFile f)
         {
             AddFileLink(ExternalMapLow, f);
@@ -427,7 +421,7 @@ namespace bbaLib
                 return null;
             }
         }
-        public void SetModPackInfo(string modname, S5ModPackInfo i)
+        public void SetModPackInfo(string modname, S5ModPackInfo? i)
         {
             string n = ModPackXml(modname);
             if (i == null)
@@ -443,7 +437,7 @@ namespace bbaLib
         public bool ImportFolderMap(string path, Action<string>? msgHandler = null)
         {
             if (msgHandler == null)
-                msgHandler = x => { };
+                msgHandler = _ => { };
 
             AddFileFromFilesystem(path, InfoXML);
             S5MapInfo? i = MapInfo;
@@ -460,7 +454,7 @@ namespace bbaLib
                 return false;
             }
             string mappreview = i.MiniMapTextureName;
-            string maptexturefolder = "maps\\user\\" + Path.GetFileName(folder) + "\\";
+            string maptexturefolder = $"maps\\user\\{Path.GetFileName(folder)}\\";
             if (mappreview.StartsWith(maptexturefolder))
             {
                 mappreview = mappreview.Replace(maptexturefolder, "");

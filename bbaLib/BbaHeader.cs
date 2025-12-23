@@ -1,24 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace bbaLib
+﻿namespace bbaLib
 {
     internal class BbaHeader
     {
-        private static readonly byte[] BAFHeaderGlobal = [(byte)'B', (byte)'A', (byte)'F'];
-        private static readonly byte[] BAHHeaderGlobal = [(byte)'B', (byte)'A', (byte)'H'];
-        private static readonly byte[] BAfHeaderGlobal = [(byte)'B', (byte)'A', (byte)'f'];
+        // ReSharper disable once InconsistentNaming
+        private static readonly byte[] BAFHeaderGlobal = "BAF"u8.ToArray();
+        // ReSharper disable once InconsistentNaming
+        private static readonly byte[] BAHHeaderGlobal = "BAH"u8.ToArray();
+        private static readonly byte[] BAfHeaderGlobal = "BAf"u8.ToArray();
 
         internal byte[] Header = BAFHeaderGlobal;
         internal byte ArchiveVersion = 2;
         internal UInt32 ArchiveLength;
 
+        // ReSharper disable once InconsistentNaming
         internal byte[] BAHHeader = BAHHeaderGlobal;
+        // ReSharper disable once InconsistentNaming
         internal byte BAHVersion = 2;
+        // ReSharper disable once InconsistentNaming
         internal UInt32 BAHLength = 8;
         internal UInt32 UnknownField = 3;
         internal UInt32 GameVersion = 1;

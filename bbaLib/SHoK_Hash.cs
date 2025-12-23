@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace bbaLib
+﻿namespace bbaLib
 {
-    internal class SHoK_Hash
+    // ReSharper disable once InconsistentNaming
+    internal static class SHoK_Hash
     {
         internal static UInt32 GetHash(string s)
         {

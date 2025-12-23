@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace bbaLib
+﻿namespace bbaLib
 {
-    internal class StreamCache
+    internal static class StreamCache
     {
         private static readonly Dictionary<Stream, int> Cache = [];
 
@@ -15,10 +8,8 @@ namespace bbaLib
         {
             if (s == null)
                 return;
-            if (Cache.ContainsKey(s))
+            if (!Cache.TryAdd(s, 1))
                 Cache[s]++;
-            else
-                Cache[s] = 1;
         }
 
         internal static void RemoveRef(Stream? s)

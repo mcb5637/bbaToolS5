@@ -3,12 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace bbaToolS5
 {
-    internal class BbaToolConsole
+    internal static class BbaToolConsole
     {
         internal static void Main(string[] args)
         {
@@ -41,6 +39,7 @@ namespace bbaToolS5
             {
                 string output;
                 bool toArchive;
+                // ReSharper disable once InconsistentNaming
                 bool checkForS5x = false;
                 if (files.Count == 0)
                 {

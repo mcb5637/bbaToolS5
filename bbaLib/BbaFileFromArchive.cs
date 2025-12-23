@@ -1,10 +1,4 @@
 ﻿using Ionic.Zlib;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace bbaLib
 {
@@ -16,15 +10,15 @@ namespace bbaLib
         internal bool IsCompressed;
         internal required string SourceInternalPath;
 
-        private Stream? s;
+        private Stream? InternalStream;
         internal Stream? ReadFrom
         {
-            get => s;
+            get => InternalStream;
             set
             {
-                StreamCache.RemoveRef(s);
-                s = value;
-                StreamCache.AddRef(s);
+                StreamCache.RemoveRef(InternalStream);
+                InternalStream = value;
+                StreamCache.AddRef(InternalStream);
             }
         }
 
@@ -47,18 +41,18 @@ namespace bbaLib
 
         private byte[] GetDataUncompressed()
         {
-            if (s == null)
+            if (InternalStream == null)
                 throw new NullReferenceException("already closed");
-            BinaryReader r = new(s);
+            BinaryReader r = new(InternalStream);
             r.BaseStream.Seek(FileOffset, SeekOrigin.Begin);
             return r.ReadBytes((int)FileLength);
         }
 
         private byte[] GetDataCompressed()
         {
-            if (s == null)
+            if (InternalStream == null)
                 throw new NullReferenceException("already closed");
-            BinaryReader r = new(s);
+            BinaryReader r = new(InternalStream);
             r.BaseStream.Seek(FileOffset, SeekOrigin.Begin);
             BbaCompresedFileHeader h = new();
             h.Read(r);
@@ -73,8 +67,8 @@ namespace bbaLib
 
         internal override void Remove()
         {
-            StreamCache.RemoveRef(s);
-            s = null;
+            StreamCache.RemoveRef(InternalStream);
+            InternalStream = null;
         }
 
         internal override BbaFile Clone()
@@ -87,7 +81,7 @@ namespace bbaLib
                 IsCompressed = IsCompressed,
                 SourceInternalPath = SourceInternalPath,
                 SourceFilePath = SourceFilePath,
-                ReadFrom = s
+                ReadFrom = InternalStream
             };
         }
     }

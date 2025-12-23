@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace bbaLib
+﻿namespace bbaLib
 {
     internal class BbaDirectoryHeader
     {
-        private static readonly byte[] BAdHeaderGlobal = [(byte)'B', (byte)'A', (byte)'d'];
-        private static readonly byte[] BAeHeaderGlobal = [(byte)'B', (byte)'A', (byte)'e'];
+        private static readonly byte[] BAdHeaderGlobal = "BAd"u8.ToArray();
+        private static readonly byte[] BAeHeaderGlobal = "BAe"u8.ToArray();
 
         internal byte[] DirHeader = BAdHeaderGlobal;
         internal byte DirVersion = 2;

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Schema;
+﻿using System.Xml.Schema;
 using System.Xml.Serialization;
 
 namespace bbaLib
@@ -25,6 +20,7 @@ namespace bbaLib
         public string Schema
         {
             get => "https://raw.githubusercontent.com/mcb5637/s5xmlschema/master/info.xsd";
+            // ReSharper disable once ValueParameterNotUsed
             set { }
         }
             
@@ -57,6 +53,7 @@ namespace bbaLib
         public string Schema
         {
             get => "https://raw.githubusercontent.com/mcb5637/s5xmlschema/master/modpack.xsd";
+            // ReSharper disable once ValueParameterNotUsed
             set { }
         }
     }

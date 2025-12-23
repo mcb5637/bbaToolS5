@@ -1,10 +1,4 @@
 ﻿using Ionic.Zlib;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace bbaLib
 {
@@ -20,13 +14,13 @@ namespace bbaLib
             if (ar == null)
                 ar = new BbaArchive();
             if (shouldAdd == null)
-                shouldAdd = (x) => true;
+                shouldAdd = (_) => true;
             if (prog == null)
-                prog = (X) => { };
+                prog = (_) => { };
 
             ProgressStatus status = new()
             {
-                Step = ProgressStatusStep.ReadBba_Header
+                Step = ProgressStatusStep.ReadBbaHeader
             };
 
             StreamCache.AddRef(inp);
@@ -42,7 +36,7 @@ namespace bbaLib
             status.AdditionalData = 0;
 
             // read directory
-            status.Step = ProgressStatusStep.ReadBba_Directory;
+            status.Step = ProgressStatusStep.ReadBbaDirectory;
 
             r.BaseStream.Seek(fileheader.FileDataLength, SeekOrigin.Current); // skip to directory info
             BbaDirectoryHeader dirhead = new();
@@ -63,7 +57,7 @@ namespace bbaLib
             status.AdditionalData = 0;
 
             // read hasthable
-            status.Step = ProgressStatusStep.ReadBba_HashTable;
+            status.Step = ProgressStatusStep.ReadBbaHashTable;
 
             BbaHashTableHeader hashheader = new();
             hashheader.Read(r);
@@ -98,7 +92,7 @@ namespace bbaLib
 
 
             // load file descriptions
-            status.Step = ProgressStatusStep.ReadBba_FileCatalog;
+            status.Step = ProgressStatusStep.ReadBbaFileCatalog;
 
             int processedFiles = 0;
             List<BbaFileFromArchive> loaded = new();

@@ -1,14 +1,8 @@
 ﻿using Ionic.Zlib;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace bbaLib
 {
-    public class BbaWriter
+    public static class BbaWriter
     {
         public static void WriteBba(BbaArchive a, string file, Action<ProgressStatus>? prog = null, bool autoCompression = false)
         {
@@ -19,10 +13,10 @@ namespace bbaLib
         public static void WriteBba(BbaArchive a, Stream w, Action<ProgressStatus>? prog = null, bool autoCompression = false)
         {
             if (prog == null)
-                prog = (X) => { };
+                prog = (_) => { };
             ProgressStatus stat = new()
             {
-                Step = ProgressStatusStep.WriteBba_Files,
+                Step = ProgressStatusStep.WriteBbaFiles,
                 Progress = 0
             };
 
@@ -44,11 +38,9 @@ namespace bbaLib
                     byte[] compressed = [];
                     if ((autoCompression && !f.NeverCompress) || f.ShouldCompess)
                         compressed = ZipTools.CompressBuffer(file);
-                    if (autoCompression && !f.NeverCompress) {
-                        if (compressed.Length + 5 * 4 < file.Length)
-                            f.ShouldCompess = true;
-                        else
-                            f.ShouldCompess = false;
+                    if (autoCompression && !f.NeverCompress)
+                    {
+                        f.ShouldCompess = compressed.Length + 5 * 4 < file.Length;
                     }
 
                     if (f.ShouldCompess && !f.NeverCompress)
@@ -81,13 +73,13 @@ namespace bbaLib
             }
             filesize += (int)w.Position;
 
-            BbaDirStructEntry root = BuildStructure(a, out int Count);
-            stat.Step = ProgressStatusStep.WriteBba_Directory;
+            BbaDirStructEntry root = BuildStructure(a, out int count);
+            stat.Step = ProgressStatusStep.WriteBbaDirectory;
             stat.Progress = 0;
             // write directories
             MemoryStream direct = new();
             BinaryWriter diwr = new(direct);
-            diwr.Write(Count);
+            diwr.Write(count);
             WriteDirectory(diwr, root, prog, stat);
             BbaDirectoryHeader dirhead = new();
 
@@ -106,31 +98,32 @@ namespace bbaLib
             dirhead.FileEntrieLength = dirhead.DataLength + 8;
             SHoK_Crypt.Encrypt(data);
 
-            int HashSize = GetHashTableSize(Count);
+            int hashSize = GetHashTableSize(count);
 
-            dirhead.DirLength = (uint)(dirhead.FileEntrieLength + 8 + (HashSize * BbaHashTableEntry.Size + 4) + 8);
+            dirhead.DirLength = (uint)(dirhead.FileEntrieLength + 8 + (hashSize * BbaHashTableEntry.Size + 4) + 8);
             dirhead.Write(wr);
             wr.Write(data);
 
 
-            stat.Step = ProgressStatusStep.WriteBba_HashTable;
+            stat.Step = ProgressStatusStep.WriteBbaHashTable;
             stat.AdditionalString = null;
 
 
             // write hashtables
+            // ReSharper disable once UnusedVariable
             long hashTablePos = w.Position;
-            UInt32 mask = (uint)(HashSize - 1);
-            BbaHashTableEntry[] hashtable = new BbaHashTableEntry[HashSize];
+            UInt32 mask = (uint)(hashSize - 1);
+            BbaHashTableEntry?[] hashtable = new BbaHashTableEntry?[hashSize];
             WriteHashEntry(root, hashtable, mask);
 
             BbaHashTableHeader hashheader = new()
             {
-                HashTableSize = (uint)HashSize,
-                HashTableLength = (uint)(HashSize * BbaHashTableEntry.Size + 4)
+                HashTableSize = (uint)hashSize,
+                HashTableLength = (uint)(hashSize * BbaHashTableEntry.Size + 4)
             };
             hashheader.Write(wr);
             currFile = 0;
-            foreach (BbaHashTableEntry e in hashtable)
+            foreach (BbaHashTableEntry? e in hashtable)
             {
                 if (e == null)
                     BbaHashTableEntry.WriteNull(wr);
@@ -139,7 +132,7 @@ namespace bbaLib
                 currFile++;
                 if (currFile % 10 ==0)
                 {
-                    stat.Progress = 100 * currFile / HashSize;
+                    stat.Progress = 100 * currFile / hashSize;
                     prog(stat);
                 }
             }
@@ -169,15 +162,10 @@ namespace bbaLib
                 return size * 2;
         }
 
-        private static void WriteHashEntry(BbaDirStructEntry e, BbaHashTableEntry[] t, UInt32 mask)
+        private static void WriteHashEntry(BbaDirStructEntry e, BbaHashTableEntry?[] t, UInt32 mask)
         {
             UInt32 hash = SHoK_Hash.GetHash(e.Filename);
             UInt32 masked;
-            if (t[0] == null && false)
-            {
-                masked = 0;
-            }
-            else
             {
                 masked = hash & mask;
                 while (t[masked] != null)
@@ -185,7 +173,7 @@ namespace bbaLib
             }
             t[masked] = new BbaHashTableEntry()
             {
-                DirOffset = (uint)e.OwnOffset,
+                DirOffset = e.OwnOffset,
                 HashValue = hash
             };
             if (e.NextSiblingLink != null)
@@ -223,7 +211,7 @@ namespace bbaLib
             return (int)e.OwnOffset;
         }
 
-        private static BbaDirStructEntry BuildStructure(BbaArchive a, out int Count)
+        private static BbaDirStructEntry BuildStructure(BbaArchive a, out int count)
         {
             a.Contents.Sort();
             BbaDirStructEntry root = new()
@@ -232,7 +220,7 @@ namespace bbaLib
                 Timestamp = 0,
                 Filename = "."
             };
-            Count = 1;
+            count = 1;
             foreach (BbaFile f in a)
             {
                 string[] path = f.InternalPath.Split('\\');
@@ -251,7 +239,7 @@ namespace bbaLib
                             Filename = current
                         };
                         c.AddChild(c2);
-                        Count++;
+                        count++;
                     }
                     c = c2;
                 }
@@ -262,7 +250,7 @@ namespace bbaLib
                     Filename = f.InternalPath,
                     FileLink = f
                 });
-                Count++;
+                count++;
             }
             return root;
         }

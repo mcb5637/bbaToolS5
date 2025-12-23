@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace bbaLib
+﻿namespace bbaLib
 {
-    internal class SHoK_Crypt
+    // ReSharper disable once InconsistentNaming
+    internal static class SHoK_Crypt
     {
         private static readonly UInt32[] Key = [0x298F599D, 0x67AD005D, 0x2AF91C8D, 0x66433D6D];
         private static readonly UInt32 Delta = 0x61C88647;

@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace bbaLib
+﻿namespace bbaLib
 {
     internal class BbaHashTableHeader
     {
-        private static readonly byte[] BAhHeaderGlobal = [(byte)'B', (byte)'A', (byte)'h'];
+        private static readonly byte[] BAhHeaderGlobal = "BAh"u8.ToArray();
 
         internal byte[] Header = BAhHeaderGlobal;
         internal byte HeaderVersion = 2;

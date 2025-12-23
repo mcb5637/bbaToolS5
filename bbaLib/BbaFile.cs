@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace bbaLib
+﻿namespace bbaLib
 {
     public abstract class BbaFile : IComparable<BbaFile>
     {
-        internal static string[] CompressedExt = [".xml", ".lua", ".bin", ".fdb", ".fx", ".txt"];
-        internal static string[] NeverCompressExt = [".wav", ".mp3"];
+        internal static readonly string[] CompressedExt = [".xml", ".lua", ".bin", ".fdb", ".fx", ".txt"];
+        internal static readonly string[] NeverCompressExt = [".wav", ".mp3"];
 
         public string InternalPath
         {
@@ -31,7 +24,7 @@ namespace bbaLib
         {
             if (other == null)
                 return 1;
-            return InternalPath.CompareTo(other.InternalPath);
+            return String.Compare(InternalPath, other.InternalPath, StringComparison.Ordinal);
         }
 
         public void SetCompressByExtension()

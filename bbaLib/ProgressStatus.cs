@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace bbaLib
+﻿namespace bbaLib
 {
     public class ProgressStatus
     {
@@ -50,14 +44,14 @@ namespace bbaLib
 
     public enum ProgressStatusStep
     {
-        ReadBba_Header,
-        ReadBba_HashTable,
-        ReadBba_Directory,
-        ReadBba_FileCatalog,
-        WriteFolder_File,
-        ReadFolder_File,
-        WriteBba_Files,
-        WriteBba_Directory,
-        WriteBba_HashTable
+        ReadBbaHeader,
+        ReadBbaHashTable,
+        ReadBbaDirectory,
+        ReadBbaFileCatalog,
+        WriteFolderFile,
+        ReadFolderFile,
+        WriteBbaFiles,
+        WriteBbaDirectory,
+        WriteBbaHashTable
     }
 }

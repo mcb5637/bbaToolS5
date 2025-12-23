@@ -1,14 +1,8 @@
 ﻿using Ionic.Zlib;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace bbaLib
 {
-    internal class ZipTools
+    internal static class ZipTools
     {
         internal static byte[] CompressBuffer(byte[] b)
         {

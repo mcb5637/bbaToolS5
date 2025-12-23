@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 
 namespace bbaLib
 {
@@ -57,7 +52,8 @@ namespace bbaLib
             Offset = r.ReadUInt32();
             Size = r.ReadUInt32();
             UInt16 l = r.ReadUInt16();
-            UInt16 DirPart = r.ReadUInt16();
+            // ReSharper disable once UnusedVariable
+            UInt16 dirPart = r.ReadUInt16();
             FirstChild = r.ReadInt32();
             NextSibling = r.ReadInt32();
             Timestamp = r.ReadUInt64();
