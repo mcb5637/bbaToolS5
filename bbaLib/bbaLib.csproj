@@ -15,7 +15,6 @@
     <ItemGroup>
         <PackageReference Include="Ionic.Zlib.Core" Version="1.0.0"/>
         <PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
-        <PackageReference Include="StackXML" Version="1.0.1" />
     </ItemGroup>
 
 </Project>
