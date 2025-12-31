@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Xml.Serialization;
 
 namespace bbaLib
 {
@@ -361,14 +360,7 @@ namespace bbaLib
                 if (f == null)
                     return null;
                 using Stream s = f.GetStream();
-                try
-                {
-                    return new XmlSerializer(typeof(S5MapInfo)).Deserialize(s) as S5MapInfo;
-                }
-                catch (InvalidOperationException)
-                {
-                    return null;
-                }
+                return S5MapInfo.FromXML(s);
             }
             set
             {
@@ -378,7 +370,7 @@ namespace bbaLib
                     return;
                 }
                 using MemoryStream s = new();
-                new XmlSerializer(typeof(S5MapInfo)).Serialize(s, value);
+                value.ToXML(s);
                 AddFileFromMem(s.GetBuffer(), InfoXML);
             }
         }
@@ -404,7 +396,7 @@ namespace bbaLib
 
         public static string ModPackXml(string modname)
         {
-            return $"modpack/{modname}/modpack.xml";
+            return $"modpack\\{modname}\\modpack.xml";
         }
         public S5ModPackInfo? GetModPackInfo(string modname)
         {
@@ -412,14 +404,7 @@ namespace bbaLib
             if (f == null)
                 return null;
             using Stream s = f.GetStream();
-            try
-            {
-                return new XmlSerializer(typeof(S5ModPackInfo)).Deserialize(s) as S5ModPackInfo;
-            }
-            catch (InvalidOperationException)
-            {
-                return null;
-            }
+            return S5ModPackInfo.FromXML(s);
         }
         public void SetModPackInfo(string modname, S5ModPackInfo? i)
         {
@@ -430,7 +415,7 @@ namespace bbaLib
                 return;
             }
             using MemoryStream s = new();
-            new XmlSerializer(typeof(S5MapInfo)).Serialize(s, i);
+            i.ToXML(s);
             AddFileFromMem(s.GetBuffer(), n);
         }
 
