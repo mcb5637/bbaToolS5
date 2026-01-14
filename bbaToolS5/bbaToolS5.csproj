@@ -12,6 +12,7 @@
     <Nullable>enable</Nullable>
 	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 	<LangVersion>14</LangVersion>
+    <PublishAot>true</PublishAot>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\AssemblyInfo.cs" Link="AssemblyInfo.cs" />

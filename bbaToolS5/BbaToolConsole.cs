@@ -96,6 +96,40 @@ namespace bbaToolS5
             }
         }
 
+        internal class MakeMapVersionInfo : Operation
+        {
+            internal required string OutFile;
+            
+            internal override void Run(BbaArchive a, ref RunParams p)
+            {
+                var i = a.MapInfo;
+                if (i == null)
+                {
+                    Console.WriteLine("warning: could not find mapinfo.xml to read GUID");
+                    return;
+                }
+                Console.WriteLine($"write GUID {i.GUID} to {OutFile}");
+                File.WriteAllText(OutFile, i.GUID);
+            }
+        }
+
+        internal class MakeModPackVersionInfo : Operation
+        {
+            internal required string OutFile, ModName;
+            
+            internal override void Run(BbaArchive a, ref RunParams p)
+            {
+                var i = a.GetModPackInfo(ModName);
+                if (i == null)
+                {
+                    Console.WriteLine("warning: could not find modpack.xml to read Version");
+                    return;
+                }
+                Console.WriteLine($"write version {i.Version} to {OutFile}");
+                File.WriteAllText(OutFile, i.Version);
+            }
+        }
+
         internal struct RunParams
         {
             internal bool IgnoreHidden;
@@ -147,6 +181,16 @@ namespace bbaToolS5
                         ModName = p[0],
                         Version = p[1],
                     });
+                }
+                else if (f.StartsWith("-mapVersionInfo:"))
+                {
+                    string p = f.Remove(0, 16);
+                    ops.Add(new MakeMapVersionInfo{OutFile = p});
+                }
+                else if (f.StartsWith("-modVersionInfo:"))
+                {
+                    string[] p = f.Remove(0, 16).Split(':');
+                    ops.Add(new MakeModPackVersionInfo{OutFile = p[1], ModName = p[0]});
                 }
                 else
                     ops.Add(new ReadFrom{ ToRead = f.TrimEnd('\\', '/') });
