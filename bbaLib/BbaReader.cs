@@ -77,7 +77,7 @@ namespace bbaLib
                 if (hashentry2.HashValue != 0)
                 {
                     BbaDirStructEntry e2 = ReadDirStructEntry(r2, hashentry2.DirOffset);
-                    if (".".Equals(e2.Filename))
+                    if (".".Equals(e2.Filename) || "".Equals(e2.Filename))
                     {
                         found = true;
                         hashentry = hashentry2;
@@ -97,7 +97,7 @@ namespace bbaLib
             int processedFiles = 0;
             List<BbaFileFromArchive> loaded = new();
             BbaDirStructEntry e = ProcessDirStructEntry(ar, r2, hashentry.DirOffset, file, inp, shouldAdd, prog, numFiles, ref processedFiles, status, loaded);
-            if (!e.Filename.Equals("."))
+            if (!e.Filename.Equals(".") && !e.Filename.Equals(""))
                 throw new IOException("hashtable not pointing to root");
 
             StreamCache.RemoveRef(inp);
